@@ -121,9 +121,15 @@ function ApiPage() {
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li>
               <code className="text-foreground">POST /api/public/v1/design</code> — generate a
-              design, review, or stack recommendation.
+              design, review, or stack recommendation. Full documents take minutes, so pick a
+              transport: <code className="text-foreground">"stream": true</code> returns
+              Server-Sent Events (<code className="text-foreground">design.started</code>,{" "}
+              <code className="text-foreground">delta</code>,{" "}
+              <code className="text-foreground">design.completed</code>) and never idles out;{" "}
+              <code className="text-foreground">"wait": false</code> returns 202 with a design id
+              to poll. Omit both for the simple buffered response on short prompts.
             </li>
-            <li>
+
               <code className="text-foreground">GET /api/public/v1/designs</code> — list your saved
               designs.
             </li>
