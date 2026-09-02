@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
+import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
 import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
 import { Route as ApiPublicV1DesignsIdRouteImport } from './routes/api/public/v1/designs.$id'
 
@@ -30,6 +31,11 @@ const ApiPublicV1DesignRoute = ApiPublicV1DesignRouteImport.update({
   path: '/api/public/v1/design',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1KnowledgeRoute = ApiPublicV1KnowledgeRouteImport.update({
+  id: '/api/public/v1/knowledge',
+  path: '/api/public/v1/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicV1DesignsIndexRoute = ApiPublicV1DesignsIndexRouteImport.update({
   id: '/api/public/v1/designs/',
   path: '/api/public/v1/designs/',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/designs': typeof ApiPublicV1DesignsIndexRoute
 }
@@ -60,6 +68,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
 }
@@ -69,6 +78,7 @@ export interface FileRouteTypes {
     | '/'
     | '/api/chat'
     | '/api/public/v1/design'
+    | '/api/public/v1/knowledge'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/designs/'
   fileRoutesByTo: FileRoutesByTo
@@ -76,6 +86,7 @@ export interface FileRouteTypes {
     | '/'
     | '/api/chat'
     | '/api/public/v1/design'
+    | '/api/public/v1/knowledge'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/designs'
   id:
@@ -83,6 +94,7 @@ export interface FileRouteTypes {
     | '/'
     | '/api/chat'
     | '/api/public/v1/design'
+    | '/api/public/v1/knowledge'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/designs/'
   fileRoutesById: FileRoutesById
@@ -91,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
+  ApiPublicV1KnowledgeRoute: typeof ApiPublicV1KnowledgeRoute
   ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
   ApiPublicV1DesignsIndexRoute: typeof ApiPublicV1DesignsIndexRoute
 }
@@ -118,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1DesignRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/knowledge': {
+      id: '/api/public/v1/knowledge'
+      path: '/api/public/v1/knowledge'
+      fullPath: '/api/public/v1/knowledge'
+      preLoaderRoute: typeof ApiPublicV1KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/designs/': {
       id: '/api/public/v1/designs/'
       path: '/api/public/v1/designs'
@@ -139,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiChatRoute: ApiChatRoute,
   ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
+  ApiPublicV1KnowledgeRoute: ApiPublicV1KnowledgeRoute,
   ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,
   ApiPublicV1DesignsIndexRoute: ApiPublicV1DesignsIndexRoute,
 }
