@@ -48,10 +48,10 @@ function AppShell() {
     <div className="flex h-screen bg-background">
       <aside className="flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
         <div className="flex items-center gap-2.5 border-b border-sidebar-border px-4 py-4">
-          <div className="grid size-7 place-items-center rounded-md border border-primary/40 bg-primary/10">
-            <GitBranch className="size-3.5 text-primary" />
+          <div className="grid size-6 place-items-center rounded bg-primary">
+            <GitBranch className="size-3.5 text-primary-foreground" />
           </div>
-          <span className="font-display text-sm font-semibold">Architect</span>
+          <span className="font-display text-sm font-bold tracking-tight">ARCHITECT_OS</span>
         </div>
 
         <div className="space-y-1 border-b border-sidebar-border p-3">
@@ -75,9 +75,9 @@ function AppShell() {
             <Link
               key={item.to}
               to={item.to}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent [&.active]:bg-sidebar-accent [&.active]:text-primary"
+              className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground [&.active]:bg-secondary [&.active]:text-primary"
             >
-              <item.icon className="size-3.5" />
+              <item.icon className="size-4" />
               {item.label}
             </Link>
           ))}
@@ -91,7 +91,7 @@ function AppShell() {
                 key={thread.id}
                 to="/app/$threadId"
                 params={{ threadId: thread.id }}
-                className="block truncate rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground [&.active]:bg-sidebar-accent [&.active]:text-sidebar-foreground"
+                className="block truncate rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground [&.active]:bg-secondary [&.active]:font-medium [&.active]:text-foreground"
               >
                 {thread.title}
               </Link>
@@ -106,7 +106,7 @@ function AppShell() {
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start"
+            className="w-full justify-start text-muted-foreground"
             onClick={async () => {
               await supabase.auth.signOut();
               router.navigate({ to: "/auth" });
@@ -117,7 +117,7 @@ function AppShell() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1">
+      <main className="min-w-0 flex-1 bg-background">
         <Outlet />
       </main>
     </div>

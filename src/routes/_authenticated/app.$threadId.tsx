@@ -45,9 +45,12 @@ function ThreadPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="flex items-center justify-between border-b border-border px-6 py-3">
-        <div className="min-w-0">
-          <p className="truncate font-display text-sm font-semibold">{thread.title}</p>
+      <header className="flex items-center justify-between gap-4 border-b border-border bg-card px-6 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <p className="truncate font-display text-sm font-bold tracking-tight">{thread.title}</p>
+          <span className="label-mono shrink-0 rounded border border-border bg-secondary px-2 py-0.5 text-primary">
+            {mode}
+          </span>
         </div>
       </header>
       <div className="min-h-0 flex-1">

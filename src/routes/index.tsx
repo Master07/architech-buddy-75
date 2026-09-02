@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { MODE_META, DESIGN_MODES } from "@/lib/design-agent";
-import { ArrowRight, BookOpen, GitBranch, Plug, ShieldCheck } from "lucide-react";
+import { ArrowRight, BookOpen, GitBranch, Plug, ShieldCheck, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,6 +25,24 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
+const BAND = [
+  {
+    icon: Zap,
+    title: "Live streaming",
+    body: "Watch the specification materialise section by section as you talk.",
+  },
+  {
+    icon: BookOpen,
+    title: "Your own books",
+    body: "Upload the books and internal docs you trust. Passages are cited inline.",
+  },
+  {
+    icon: Plug,
+    title: "IDE & CI ready",
+    body: "Per-user API keys run the same agent from scripts and pipelines.",
+  },
+];
+
 const FEATURES = [
   {
     icon: GitBranch,
@@ -32,54 +50,49 @@ const FEATURES = [
     body: "Requirements, back-of-envelope capacity math, a Mermaid architecture diagram, API and data model, deep dives, failure modes and a scaling path.",
   },
   {
-    icon: BookOpen,
-    title: "Grounded in your own books",
-    body: "Upload the system design books and internal docs you trust. The agent retrieves passages and cites the source title inline.",
-  },
-  {
     icon: ShieldCheck,
     title: "Opinionated, with receipts",
     body: "Every major decision names the rejected alternative and the trade-off that decided it. Assumptions are stated, never hidden.",
-  },
-  {
-    icon: Plug,
-    title: "Callable from your IDE and CI",
-    body: "A REST API with per-user keys means the same agent runs from scripts, pipelines, and coding assistants — not just this browser tab.",
   },
 ];
 
 function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="grid size-8 place-items-center rounded-md border border-primary/40 bg-primary/10">
-              <GitBranch className="size-4 text-primary" />
+            <div className="grid size-7 place-items-center rounded bg-primary">
+              <GitBranch className="size-4 text-primary-foreground" />
             </div>
-            <span className="font-display text-sm font-semibold tracking-tight">
-              System Design Architect
-            </span>
+            <span className="font-display text-sm font-bold tracking-tight">ARCHITECT_OS</span>
           </div>
-          <Button asChild size="sm">
-            <Link to="/auth">Sign in</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button asChild size="sm" variant="ghost">
+              <Link to="/auth">Documentation</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          </div>
         </div>
       </header>
 
       <main>
-        <section className="grid-paper border-b border-border/60">
-          <div className="mx-auto max-w-6xl px-6 py-24">
-            <p className="label-mono text-primary">Design before implementation</p>
-            <h1 className="mt-5 max-w-3xl text-balance text-5xl font-semibold leading-[1.05] md:text-6xl">
-              An architect that interrogates your problem before it draws a box.
+        <section className="grid-paper border-b border-border">
+          <div className="mx-auto flex max-w-4xl flex-col items-center px-6 py-24 text-center">
+            <span className="label-mono rounded-full border border-border bg-card px-3 py-1 text-primary">
+              Design before implementation
+            </span>
+            <h1 className="mt-6 text-balance text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl">
+              System Design <span className="text-primary">Architect</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
               Most AI tools hand you a diagram and a confident shrug. This one runs the interview,
-              does the capacity arithmetic out loud, commits to a recommendation, and tells you
-              exactly which alternative it rejected and why.
+              does the capacity arithmetic out loud, commits to a recommendation, and names the
+              alternative it rejected.
             </p>
-            <div className="mt-9 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Button asChild size="lg">
                 <Link to="/auth">
                   Start a design <ArrowRight className="ml-1 size-4" />
@@ -89,13 +102,25 @@ function Landing() {
                 <Link to="/auth">View the API</Link>
               </Button>
             </div>
+
+            <div className="mt-20 grid w-full gap-10 border-t border-border pt-12 md:grid-cols-3">
+              {BAND.map((item) => (
+                <div key={item.title} className="flex flex-col items-center gap-2">
+                  <div className="grid size-10 place-items-center rounded bg-secondary text-primary">
+                    <item.icon className="size-5" />
+                  </div>
+                  <h2 className="label-mono text-muted-foreground">{item.title}</h2>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="border-b border-border/60">
-          <div className="mx-auto grid max-w-6xl gap-px bg-border/60 px-0 md:grid-cols-4">
+        <section className="border-b border-border bg-card">
+          <div className="mx-auto grid max-w-6xl gap-px bg-border md:grid-cols-4">
             {DESIGN_MODES.map((mode) => (
-              <div key={mode} className="bg-background p-6">
+              <div key={mode} className="bg-card p-6">
                 <p className="label-mono text-primary">{MODE_META[mode].label}</p>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                   {MODE_META[mode].blurb}
@@ -106,26 +131,24 @@ function Landing() {
         </section>
 
         <section className="mx-auto max-w-6xl px-6 py-20">
-          <div className="grid gap-10 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {FEATURES.map((feature) => (
-              <div key={feature.title} className="flex gap-4">
-                <div className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-md border border-border bg-card">
-                  <feature.icon className="size-4 text-primary" />
+              <div key={feature.title} className="panel p-8">
+                <div className="grid size-10 place-items-center rounded bg-secondary text-primary">
+                  <feature.icon className="size-5" />
                 </div>
-                <div>
-                  <h2 className="text-base font-semibold">{feature.title}</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {feature.body}
-                  </p>
-                </div>
+                <h2 className="mt-6 text-lg font-bold tracking-tight">{feature.title}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="border-t border-border/60 bg-card/40">
+        <section className="border-t border-border bg-card">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-2xl font-semibold">Where it is strong, and where it is not</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Where it is strong, and where it is not
+            </h2>
             <div className="mt-8 grid gap-8 md:grid-cols-2">
               <div>
                 <p className="label-mono text-[color:var(--color-signal)]">Reliable</p>
@@ -150,7 +173,7 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-border/60">
+      <footer className="border-t border-border">
         <div className="mx-auto max-w-6xl px-6 py-8 text-xs text-muted-foreground">
           System Design Architect — design documents, reviews, and stack recommendations.
         </div>

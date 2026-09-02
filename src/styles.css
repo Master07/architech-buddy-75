@@ -144,61 +144,64 @@
 }
 
 /* ---------------------------------------------------------------------------
- * System Design Architect — "blueprint" design system.
- * Single dark theme: ink-blue surfaces, cyan drafting accent, grid textures.
+ * System Design Architect — "Cloud Technical Blueprint" design system.
+ * Single light theme: paper-white surfaces, cool slate borders, blue accent.
+ * Headings/labels in JetBrains Mono, prose in Work Sans.
  * ------------------------------------------------------------------------- */
 
 @theme inline {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Inter", ui-sans-serif, sans-serif;
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-blueprint: var(--blueprint);
   --color-signal: var(--signal);
   --color-caution: var(--caution);
+  --color-surface: var(--surface);
 }
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.171 0.021 254);
-  --foreground: oklch(0.945 0.008 250);
-  --card: oklch(0.212 0.024 254);
-  --card-foreground: oklch(0.945 0.008 250);
-  --popover: oklch(0.198 0.023 254);
-  --popover-foreground: oklch(0.945 0.008 250);
-  --primary: oklch(0.79 0.132 195);
-  --primary-foreground: oklch(0.18 0.03 230);
-  --secondary: oklch(0.268 0.026 254);
-  --secondary-foreground: oklch(0.93 0.01 250);
-  --muted: oklch(0.252 0.024 254);
-  --muted-foreground: oklch(0.7 0.021 252);
-  --accent: oklch(0.295 0.032 250);
-  --accent-foreground: oklch(0.95 0.01 250);
-  --destructive: oklch(0.63 0.198 25);
-  --destructive-foreground: oklch(0.97 0.01 250);
-  --border: oklch(1 0 0 / 11%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.79 0.132 195 / 55%);
-  --blueprint: oklch(0.79 0.132 195);
-  --signal: oklch(0.8 0.15 145);
-  --caution: oklch(0.82 0.15 80);
-  --chart-1: oklch(0.79 0.132 195);
-  --chart-2: oklch(0.75 0.13 145);
-  --chart-3: oklch(0.8 0.14 80);
-  --chart-4: oklch(0.7 0.15 300);
-  --chart-5: oklch(0.7 0.17 25);
-  --sidebar: oklch(0.152 0.02 254);
-  --sidebar-foreground: oklch(0.9 0.01 250);
-  --sidebar-primary: oklch(0.79 0.132 195);
-  --sidebar-primary-foreground: oklch(0.18 0.03 230);
-  --sidebar-accent: oklch(0.245 0.026 254);
-  --sidebar-accent-foreground: oklch(0.95 0.01 250);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.79 0.132 195 / 45%);
+  --background: oklch(0.987 0.002 248);
+  --foreground: oklch(0.279 0.041 260);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.279 0.041 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.279 0.041 260);
+  --primary: oklch(0.623 0.214 259);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.938 0.007 248);
+  --secondary-foreground: oklch(0.279 0.041 260);
+  --muted: oklch(0.938 0.007 248);
+  --muted-foreground: oklch(0.58 0.035 256);
+  --accent: oklch(0.938 0.007 248);
+  --accent-foreground: oklch(0.208 0.042 265);
+  --destructive: oklch(0.577 0.219 27);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.938 0.007 248);
+  --input: oklch(0.916 0.011 250);
+  --ring: oklch(0.623 0.214 259 / 35%);
+  --surface: oklch(0.938 0.007 248);
+  --blueprint: oklch(0.623 0.214 259);
+  --signal: oklch(0.6 0.13 155);
+  --caution: oklch(0.66 0.14 62);
+  --chart-1: oklch(0.623 0.214 259);
+  --chart-2: oklch(0.6 0.13 155);
+  --chart-3: oklch(0.66 0.14 62);
+  --chart-4: oklch(0.6 0.16 300);
+  --chart-5: oklch(0.6 0.18 20);
+  --sidebar: oklch(0.987 0.002 248);
+  --sidebar-foreground: oklch(0.279 0.041 260);
+  --sidebar-primary: oklch(0.623 0.214 259);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.938 0.007 248);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265);
+  --sidebar-border: oklch(0.938 0.007 248);
+  --sidebar-ring: oklch(0.623 0.214 259 / 35%);
 }
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 
   body {
@@ -211,20 +214,32 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    letter-spacing: -0.03em;
   }
 }
 
 @utility grid-paper {
   background-image:
-    linear-gradient(to right, oklch(1 0 0 / 3.5%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(1 0 0 / 3.5%) 1px, transparent 1px);
+    linear-gradient(to right, oklch(0.623 0.214 259 / 5%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.623 0.214 259 / 5%) 1px, transparent 1px);
   background-size: 32px 32px;
+}
+
+@utility dot-paper {
+  background-image: radial-gradient(oklch(0.623 0.214 259 / 12%) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
 @utility label-mono {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  letter-spacing: 0.12em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+@utility panel {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
 }
