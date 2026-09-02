@@ -117,7 +117,7 @@ function AppShell() {
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 bg-card">
+      <main className="min-w-0 flex-1 bg-background">
         <Outlet />
       </main>
     </div>
