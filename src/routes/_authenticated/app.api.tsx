@@ -11,13 +11,15 @@ export const Route = createFileRoute("/_authenticated/app/api")({
   component: ApiPage,
 });
 
-const CURL = `curl -X POST https://your-app.lovable.app/api/public/v1/design \\
+const CURL = `curl -N -X POST https://your-app.lovable.app/api/public/v1/design \\
   -H "Authorization: Bearer sda_..." \\
   -H "Content-Type: application/json" \\
   -d '{
     "prompt": "Design a multi-region feature flag service",
-    "mode": "design"
+    "mode": "design",
+    "stream": true
   }'`;
+
 
 function ApiPage() {
   const [name, setName] = useState("");
