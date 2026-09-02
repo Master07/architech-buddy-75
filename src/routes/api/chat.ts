@@ -38,7 +38,7 @@ export const Route = createFileRoute("/api/chat")({
             supabase: auth.supabase,
             userId: auth.userId,
             mode,
-            messages: convertToModelMessages(body.messages),
+            messages: await convertToModelMessages(body.messages),
             ...(initialRunId ? { runId: initialRunId } : {}),
           });
 
