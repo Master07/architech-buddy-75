@@ -16,6 +16,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppThreadIdRouteImport } from './routes/_authenticated/app.$threadId'
+import { Route as AuthenticatedAppDesignsRouteImport } from './routes/_authenticated/app.designs'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
 import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
 import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
@@ -56,6 +57,11 @@ const AuthenticatedAppThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppDesignsRoute = AuthenticatedAppDesignsRouteImport.update({
+  id: '/designs',
+  path: '/designs',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const ApiPublicV1DesignRoute = ApiPublicV1DesignRouteImport.update({
   id: '/api/public/v1/design',
   path: '/api/public/v1/design',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/_authenticated/app/designs': typeof AuthenticatedAppDesignsRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/chat'
     | '/app/$threadId'
+    | '/app/designs'
     | '/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/api/chat'
     | '/app/$threadId'
+    | '/app/designs'
     | '/app'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/api/chat'
     | '/_authenticated/app/$threadId'
+    | '/_authenticated/app/designs'
     | '/_authenticated/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -215,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppThreadIdRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/designs': {
+      id: '/_authenticated/app/designs'
+      path: '/designs'
+      fullPath: '/app/designs'
+      preLoaderRoute: typeof AuthenticatedAppDesignsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/api/public/v1/design': {
       id: '/api/public/v1/design'
       path: '/api/public/v1/design'
@@ -248,11 +267,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppThreadIdRoute: typeof AuthenticatedAppThreadIdRoute
+  AuthenticatedAppDesignsRoute: typeof AuthenticatedAppDesignsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppThreadIdRoute: AuthenticatedAppThreadIdRoute,
+  AuthenticatedAppDesignsRoute: AuthenticatedAppDesignsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
