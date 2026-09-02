@@ -177,9 +177,9 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
         <ConversationScrollButton />
       </Conversation>
 
-      <div className="border-t border-border bg-background/80 px-4 py-3 backdrop-blur">
+      <div className="border-t border-border bg-card px-4 py-3">
         <div className="mx-auto w-full max-w-3xl">
-          <div className="rounded-xl border border-border bg-card p-2 focus-within:border-primary/50">
+          <div className="rounded-lg border border-border bg-background p-2 transition-colors focus-within:border-primary">
             <Textarea
               value={input}
               onChange={(event) => setInput(event.target.value)}
