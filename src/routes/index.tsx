@@ -86,9 +86,7 @@ function Landing() {
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/auth" search={{ redirect: "/app/api" }}>
-                  View the API
-                </Link>
+                <Link to="/auth">View the API</Link>
               </Button>
             </div>
           </div>
