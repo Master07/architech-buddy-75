@@ -88,9 +88,7 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
         .join(" ")
         .trim();
       const title =
-        markdown.match(/^#{1,2}\s+(.+)$/m)?.[1]?.trim() ||
-        firstPrompt ||
-        "Saved design";
+        markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() || firstPrompt || "Saved design";
       await saveDesign({ data: { title: title.slice(0, 120), markdown, mode, threadId } });
       toast.success("Saved to your designs");
     } catch (saveError) {
