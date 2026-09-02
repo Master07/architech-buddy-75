@@ -10,33 +10,182 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppThreadIdRouteImport } from './routes/_authenticated/app.$threadId'
+import { Route as AuthenticatedAppDesignsRouteImport } from './routes/_authenticated/app.designs'
+import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authenticated/app.library'
+import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
+import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
+import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
+import { Route as ApiPublicV1DesignsIdRouteImport } from './routes/api/public/v1/designs.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppThreadIdRoute =
+  AuthenticatedAppThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppDesignsRoute = AuthenticatedAppDesignsRouteImport.update({
+  id: '/designs',
+  path: '/designs',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppLibraryRoute = AuthenticatedAppLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const ApiPublicV1DesignRoute = ApiPublicV1DesignRouteImport.update({
+  id: '/api/public/v1/design',
+  path: '/api/public/v1/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1KnowledgeRoute = ApiPublicV1KnowledgeRouteImport.update({
+  id: '/api/public/v1/knowledge',
+  path: '/api/public/v1/knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1DesignsIndexRoute = ApiPublicV1DesignsIndexRouteImport.update({
+  id: '/api/public/v1/designs/',
+  path: '/api/public/v1/designs/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicV1DesignsIdRoute = ApiPublicV1DesignsIdRouteImport.update({
+  id: '/api/public/v1/designs/$id',
+  path: '/api/public/v1/designs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/app': typeof AuthenticatedAppRouteWithChildren
+  '/api/chat': typeof ApiChatRoute
+  '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/app/designs': typeof AuthenticatedAppDesignsRoute
+  '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
+  '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
+  '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/api/chat': typeof ApiChatRoute
+  '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/app/designs': typeof AuthenticatedAppDesignsRoute
+  '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app': typeof AuthenticatedAppIndexRoute
+  '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
+  '/api/public/v1/designs': typeof ApiPublicV1DesignsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/api/chat': typeof ApiChatRoute
+  '/_authenticated/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/_authenticated/app/designs': typeof AuthenticatedAppDesignsRoute
+  '/_authenticated/app/library': typeof AuthenticatedAppLibraryRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
+  '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/app'
+    | '/api/chat'
+    | '/app/$threadId'
+    | '/app/designs'
+    | '/app/library'
+    | '/app/'
+    | '/api/public/v1/design'
+    | '/api/public/v1/knowledge'
+    | '/api/public/v1/designs/$id'
+    | '/api/public/v1/designs/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/api/chat'
+    | '/app/$threadId'
+    | '/app/designs'
+    | '/app/library'
+    | '/app'
+    | '/api/public/v1/design'
+    | '/api/public/v1/knowledge'
+    | '/api/public/v1/designs/$id'
+    | '/api/public/v1/designs'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/app'
+    | '/api/chat'
+    | '/_authenticated/app/$threadId'
+    | '/_authenticated/app/designs'
+    | '/_authenticated/app/library'
+    | '/_authenticated/app/'
+    | '/api/public/v1/design'
+    | '/api/public/v1/knowledge'
+    | '/api/public/v1/designs/$id'
+    | '/api/public/v1/designs/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ApiChatRoute: typeof ApiChatRoute
+  ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
+  ApiPublicV1KnowledgeRoute: typeof ApiPublicV1KnowledgeRoute
+  ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
+  ApiPublicV1DesignsIndexRoute: typeof ApiPublicV1DesignsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +197,130 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/$threadId': {
+      id: '/_authenticated/app/$threadId'
+      path: '/$threadId'
+      fullPath: '/app/$threadId'
+      preLoaderRoute: typeof AuthenticatedAppThreadIdRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/designs': {
+      id: '/_authenticated/app/designs'
+      path: '/designs'
+      fullPath: '/app/designs'
+      preLoaderRoute: typeof AuthenticatedAppDesignsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/library': {
+      id: '/_authenticated/app/library'
+      path: '/library'
+      fullPath: '/app/library'
+      preLoaderRoute: typeof AuthenticatedAppLibraryRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/api/public/v1/design': {
+      id: '/api/public/v1/design'
+      path: '/api/public/v1/design'
+      fullPath: '/api/public/v1/design'
+      preLoaderRoute: typeof ApiPublicV1DesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/knowledge': {
+      id: '/api/public/v1/knowledge'
+      path: '/api/public/v1/knowledge'
+      fullPath: '/api/public/v1/knowledge'
+      preLoaderRoute: typeof ApiPublicV1KnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/designs/': {
+      id: '/api/public/v1/designs/'
+      path: '/api/public/v1/designs'
+      fullPath: '/api/public/v1/designs/'
+      preLoaderRoute: typeof ApiPublicV1DesignsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/v1/designs/$id': {
+      id: '/api/public/v1/designs/$id'
+      path: '/api/public/v1/designs/$id'
+      fullPath: '/api/public/v1/designs/$id'
+      preLoaderRoute: typeof ApiPublicV1DesignsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppThreadIdRoute: typeof AuthenticatedAppThreadIdRoute
+  AuthenticatedAppDesignsRoute: typeof AuthenticatedAppDesignsRoute
+  AuthenticatedAppLibraryRoute: typeof AuthenticatedAppLibraryRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+}
+
+const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppThreadIdRoute: AuthenticatedAppThreadIdRoute,
+  AuthenticatedAppDesignsRoute: AuthenticatedAppDesignsRoute,
+  AuthenticatedAppLibraryRoute: AuthenticatedAppLibraryRoute,
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+}
+
+const AuthenticatedAppRouteWithChildren =
+  AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ApiChatRoute: ApiChatRoute,
+  ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
+  ApiPublicV1KnowledgeRoute: ApiPublicV1KnowledgeRoute,
+  ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,
+  ApiPublicV1DesignsIndexRoute: ApiPublicV1DesignsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

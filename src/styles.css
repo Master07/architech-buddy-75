@@ -142,3 +142,89 @@
     color: var(--color-foreground);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * System Design Architect — "blueprint" design system.
+ * Single dark theme: ink-blue surfaces, cyan drafting accent, grid textures.
+ * ------------------------------------------------------------------------- */
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-blueprint: var(--blueprint);
+  --color-signal: var(--signal);
+  --color-caution: var(--caution);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.171 0.021 254);
+  --foreground: oklch(0.945 0.008 250);
+  --card: oklch(0.212 0.024 254);
+  --card-foreground: oklch(0.945 0.008 250);
+  --popover: oklch(0.198 0.023 254);
+  --popover-foreground: oklch(0.945 0.008 250);
+  --primary: oklch(0.79 0.132 195);
+  --primary-foreground: oklch(0.18 0.03 230);
+  --secondary: oklch(0.268 0.026 254);
+  --secondary-foreground: oklch(0.93 0.01 250);
+  --muted: oklch(0.252 0.024 254);
+  --muted-foreground: oklch(0.7 0.021 252);
+  --accent: oklch(0.295 0.032 250);
+  --accent-foreground: oklch(0.95 0.01 250);
+  --destructive: oklch(0.63 0.198 25);
+  --destructive-foreground: oklch(0.97 0.01 250);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.79 0.132 195 / 55%);
+  --blueprint: oklch(0.79 0.132 195);
+  --signal: oklch(0.8 0.15 145);
+  --caution: oklch(0.82 0.15 80);
+  --chart-1: oklch(0.79 0.132 195);
+  --chart-2: oklch(0.75 0.13 145);
+  --chart-3: oklch(0.8 0.14 80);
+  --chart-4: oklch(0.7 0.15 300);
+  --chart-5: oklch(0.7 0.17 25);
+  --sidebar: oklch(0.152 0.02 254);
+  --sidebar-foreground: oklch(0.9 0.01 250);
+  --sidebar-primary: oklch(0.79 0.132 195);
+  --sidebar-primary-foreground: oklch(0.18 0.03 230);
+  --sidebar-accent: oklch(0.245 0.026 254);
+  --sidebar-accent-foreground: oklch(0.95 0.01 250);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.79 0.132 195 / 45%);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+}
+
+@utility grid-paper {
+  background-image:
+    linear-gradient(to right, oklch(1 0 0 / 3.5%) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 3.5%) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@utility label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
