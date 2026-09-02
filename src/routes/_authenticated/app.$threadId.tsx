@@ -59,6 +59,11 @@ function ThreadPage() {
           onFirstMessage={async (text) => {
             await renameThread({ data: { id: threadId, title: text.slice(0, 80) } });
             queryClient.invalidateQueries({ queryKey: ["threads"] });
+            queryClient.setQueryData(["thread", threadId], (previous: typeof query.data) =>
+              previous
+                ? { ...previous, thread: { ...previous.thread, title: text.slice(0, 80) } }
+                : previous,
+            );
           }}
         />
       </div>
