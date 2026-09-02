@@ -37,9 +37,9 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
         prepareSendMessagesRequest: async ({ messages, body }) => {
           const { data } = await supabase.auth.getSession();
           return {
-            headers: data.session
-              ? { Authorization: `Bearer ${data.session.access_token}` }
-              : undefined,
+            ...(data.session
+              ? { headers: { Authorization: `Bearer ${data.session.access_token}` } }
+              : {}),
             body: { ...body, messages, threadId, mode },
           };
         },
@@ -117,10 +117,7 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
           ) : (
             messages.map((message) => (
               <Message key={message.id} from={message.role}>
-                <MessageContent
-                  variant={message.role === "user" ? "contained" : "flat"}
-                  className={message.role === "assistant" ? "w-full" : undefined}
-                >
+                <MessageContent className={message.role === "assistant" ? "w-full" : ""}>
                   {message.parts.map((part, index) => {
                     if (part.type === "text") {
                       return (
@@ -136,7 +133,11 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
                       };
                       return (
                         <Tool key={index} className="my-2">
-                          <ToolHeader type="Library search" state={toolPart.state} />
+                          <ToolHeader
+                            type="tool-search_design_knowledge"
+                            title="Library search"
+                            state={toolPart.state}
+                          />
                           <ToolContent>
                             <ToolInput input={toolPart.input} />
                             <ToolOutput
@@ -145,9 +146,9 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
                                   <pre className="overflow-x-auto text-xs">
                                     {JSON.stringify(toolPart.output, null, 2)}
                                   </pre>
-                                ) : undefined
+                                ) : null
                               }
-                              errorText={toolPart.errorText}
+                              errorText={toolPart.errorText ?? ""}
                             />
                           </ToolContent>
                         </Tool>
