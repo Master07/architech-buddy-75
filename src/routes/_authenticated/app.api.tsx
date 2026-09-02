@@ -129,7 +129,7 @@ function ApiPage() {
               <code className="text-foreground">"wait": false</code> returns 202 with a design id
               to poll. Omit both for the simple buffered response on short prompts.
             </li>
-
+            <li>
               <code className="text-foreground">GET /api/public/v1/designs</code> — list your saved
               designs.
             </li>
