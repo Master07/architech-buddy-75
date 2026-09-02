@@ -69,6 +69,9 @@ Long designs are the one caveat: a full design doc can take longer than a synchr
 - Agent tools: `search_design_knowledge` (vector search over uploaded books), `render_diagram`, `save_design_section`. Tool activity shown collapsed in the transcript.
 - Chat UI built from AI Elements primitives; messages persisted per thread and restored on reload.
 - PDF upload → text extraction → chunk → embed → store, run in a server function with visible processing status per document.
+- The agent's core logic lives in shared server modules so the chat UI, the MCP tools, and the REST endpoints all call the same code — no duplicated prompts.
+- MCP via `@lovable.dev/mcp-js` with Supabase OAuth, tools defined under `src/lib/mcp/tools/`.
+- REST under `src/routes/api/public/v1/*`; API keys stored hashed, verified in the handler, scoped to the owning user so RLS still applies.
 
 ## Build order
 
@@ -77,3 +80,4 @@ Long designs are the one caveat: a full design doc can take longer than a synchr
 3. System-design agent prompt, mode selection, structured doc output, Mermaid rendering.
 4. Book library: upload, extraction, embedding, retrieval tool with citations.
 5. Review mode, stack advisor, Markdown export, polish.
+6. MCP server with OAuth, plus the REST API and API-key management screen.
