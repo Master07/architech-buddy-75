@@ -16,6 +16,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppThreadIdRouteImport } from './routes/_authenticated/app.$threadId'
+import { Route as AuthenticatedAppApiRouteImport } from './routes/_authenticated/app.api'
 import { Route as AuthenticatedAppDesignsRouteImport } from './routes/_authenticated/app.designs'
 import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authenticated/app.library'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
@@ -58,6 +59,11 @@ const AuthenticatedAppThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppApiRoute = AuthenticatedAppApiRouteImport.update({
+  id: '/api',
+  path: '/api',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppDesignsRoute = AuthenticatedAppDesignsRouteImport.update({
   id: '/designs',
   path: '/designs',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/app/$threadId': typeof AuthenticatedAppThreadIdRoute
+  '/_authenticated/app/api': typeof AuthenticatedAppApiRoute
   '/_authenticated/app/designs': typeof AuthenticatedAppDesignsRoute
   '/_authenticated/app/library': typeof AuthenticatedAppLibraryRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/chat'
     | '/app/$threadId'
+    | '/app/api'
     | '/app/designs'
     | '/app/library'
     | '/app/'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/api/chat'
     | '/app/$threadId'
+    | '/app/api'
     | '/app/designs'
     | '/app/library'
     | '/app'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/api/chat'
     | '/_authenticated/app/$threadId'
+    | '/_authenticated/app/api'
     | '/_authenticated/app/designs'
     | '/_authenticated/app/library'
     | '/_authenticated/app/'
@@ -239,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppThreadIdRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/api': {
+      id: '/_authenticated/app/api'
+      path: '/api'
+      fullPath: '/app/api'
+      preLoaderRoute: typeof AuthenticatedAppApiRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/designs': {
       id: '/_authenticated/app/designs'
       path: '/designs'
@@ -286,6 +305,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppThreadIdRoute: typeof AuthenticatedAppThreadIdRoute
+  AuthenticatedAppApiRoute: typeof AuthenticatedAppApiRoute
   AuthenticatedAppDesignsRoute: typeof AuthenticatedAppDesignsRoute
   AuthenticatedAppLibraryRoute: typeof AuthenticatedAppLibraryRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
@@ -293,6 +313,7 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppThreadIdRoute: AuthenticatedAppThreadIdRoute,
+  AuthenticatedAppApiRoute: AuthenticatedAppApiRoute,
   AuthenticatedAppDesignsRoute: AuthenticatedAppDesignsRoute,
   AuthenticatedAppLibraryRoute: AuthenticatedAppLibraryRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
