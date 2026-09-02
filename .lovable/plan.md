@@ -47,6 +47,20 @@ Design decision from this: the agent is opinionated and forced to state trade-of
 
 **Export** each finished design as Markdown.
 
+**Callable from other systems and IDEs.** Two access paths, both hitting the same agent and the same book knowledge base:
+
+1. **MCP server** — the native path for IDEs and assistants (Cursor, Claude, ChatGPT, Codex). You add the app as an MCP connector once and your IDE gets these tools:
+   - `design_system` — problem statement in, full design doc out
+   - `review_design` — paste a design or point at code context, get a critique
+   - `recommend_stack` — requirements in, stack/infra recommendation out
+   - `search_design_knowledge` — query your uploaded books directly
+   - `list_designs` / `get_design` — pull a saved design into your editor
+   Authenticated with OAuth so each caller acts as their own user and only sees their own designs and books.
+
+2. **REST API** — for CI, scripts, and services that aren't MCP clients. Per-user API keys generated in the app; `POST /api/public/v1/design`, `/review`, `/stack`, and `GET /v1/designs/:id`, returning JSON plus Markdown. Key sent as a bearer header, verified server-side against a hashed key record, rate-limited per key.
+
+Long designs are the one caveat: a full design doc can take longer than a synchronous IDE tool call tolerates. So the MCP tools return fast for retrieval and short answers, and full-doc generation returns a design ID immediately with the doc completing in the app — `get_design` fetches it once ready.
+
 ## Technical approach
 
 - Lovable Cloud for auth, database, file storage, and vector search (pgvector).
