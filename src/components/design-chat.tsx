@@ -81,7 +81,16 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
     }
     setSaving(true);
     try {
-      const title = markdown.match(/^#\s+(.+)$/m)?.[1]?.trim() ?? "Saved design";
+      const firstPrompt = messages
+        .find((message) => message.role === "user")
+        ?.parts.filter((part) => part.type === "text")
+        .map((part) => (part as { text: string }).text)
+        .join(" ")
+        .trim();
+      const title =
+        markdown.match(/^#{1,2}\s+(.+)$/m)?.[1]?.trim() ||
+        firstPrompt ||
+        "Saved design";
       await saveDesign({ data: { title: title.slice(0, 120), markdown, mode, threadId } });
       toast.success("Saved to your designs");
     } catch (saveError) {
