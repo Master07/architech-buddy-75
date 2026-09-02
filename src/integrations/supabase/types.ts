@@ -285,6 +285,21 @@ export type Database = {
           similarity: number
         }[]
       }
+      match_document_chunks_for_user: {
+        Args: {
+          match_count?: number
+          p_user_id: string
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          document_id: string
+          document_title: string
+          id: string
+          section: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
