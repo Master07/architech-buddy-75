@@ -25,8 +25,9 @@ export async function generateDesign(params: {
   prompt: string;
   source: "api" | "mcp" | "app";
   threadId?: string;
+  ownerScope?: string;
 }) {
-  const { supabase, userId, mode, prompt, source, threadId } = params;
+  const { supabase, userId, mode, prompt, source, threadId, ownerScope } = params;
 
   const { data: created, error: createError } = await supabase
     .from("designs")
@@ -49,6 +50,7 @@ export async function generateDesign(params: {
       userId,
       mode,
       messages: [{ role: "user", content: prompt }],
+      ...(ownerScope ? { ownerScope } : {}),
     });
     const markdown = await result.text;
 

@@ -39,6 +39,7 @@ export const Route = createFileRoute("/api/chat")({
             userId: auth.userId,
             mode,
             messages: await convertToModelMessages(body.messages),
+            ...(auth.via === "api_key" ? { ownerScope: auth.userId } : {}),
             ...(initialRunId ? { runId: initialRunId } : {}),
           });
 

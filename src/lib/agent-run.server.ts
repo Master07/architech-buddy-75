@@ -12,6 +12,8 @@ export type AgentRunOptions = {
   mode: DesignMode;
   messages: ModelMessage[];
   runId?: string;
+  /** Set when the supabase client bypasses RLS (API-key requests). */
+  ownerScope?: string;
 };
 
 export async function hasLibrary(supabase: SupabaseClient<Database>, userId: string) {
@@ -24,7 +26,7 @@ export async function hasLibrary(supabase: SupabaseClient<Database>, userId: str
 }
 
 export async function runDesignAgent(options: AgentRunOptions) {
-  const { supabase, userId, mode, messages, runId } = options;
+  const { supabase, userId, mode, messages, runId, ownerScope } = options;
   const gateway = createLovableAiGatewayProvider(requireLovableApiKey(), runId);
   const libraryReady = await hasLibrary(supabase, userId);
 
@@ -39,7 +41,7 @@ export async function runDesignAgent(options: AgentRunOptions) {
         if (!libraryReady) {
           return { hits: [], note: "The user's library is empty; answer from canonical knowledge." };
         }
-        const hits = await searchKnowledge(supabase, query, 6);
+        const hits = await searchKnowledge(supabase, query, 6, ownerScope);
         return {
           hits: hits.map((h) => ({
             source: h.document_title,

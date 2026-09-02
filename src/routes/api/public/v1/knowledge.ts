@@ -25,7 +25,12 @@ export const Route = createFileRoute("/api/public/v1/knowledge")({
           if (!parsed.success) {
             return Response.json({ error: "Invalid request body" }, { status: 400, headers: CORS });
           }
-          const hits = await searchKnowledge(auth.supabase, parsed.data.query, parsed.data.limit);
+          const hits = await searchKnowledge(
+            auth.supabase,
+            parsed.data.query,
+            parsed.data.limit,
+            auth.via === "api_key" ? auth.userId : undefined,
+          );
           return Response.json({ hits }, { headers: CORS });
         } catch (error) {
           const status = error instanceof AuthError ? error.status : 500;

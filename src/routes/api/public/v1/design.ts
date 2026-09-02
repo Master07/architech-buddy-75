@@ -35,6 +35,7 @@ export const Route = createFileRoute("/api/public/v1/design")({
             mode: parsed.data.mode,
             prompt: parsed.data.prompt,
             source: auth.via === "api_key" ? "api" : "app",
+            ...(auth.via === "api_key" ? { ownerScope: auth.userId } : {}),
           });
 
           return Response.json({ design }, { headers: CORS });
