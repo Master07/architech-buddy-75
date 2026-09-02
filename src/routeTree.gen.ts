@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
+import { Route as ApiPublicV1DesignsIdRouteImport } from './routes/api/public/v1/designs.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,50 @@ const ApiPublicV1DesignRoute = ApiPublicV1DesignRouteImport.update({
   path: '/api/public/v1/design',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1DesignsIdRoute = ApiPublicV1DesignsIdRouteImport.update({
+  id: '/api/public/v1/designs/$id',
+  path: '/api/public/v1/designs/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
+  '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/api/public/v1/design'
+  fullPaths:
+    '/' | '/api/chat' | '/api/public/v1/design' | '/api/public/v1/designs/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/api/public/v1/design'
-  id: '__root__' | '/' | '/api/chat' | '/api/public/v1/design'
+  to: '/' | '/api/chat' | '/api/public/v1/design' | '/api/public/v1/designs/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/chat'
+    | '/api/public/v1/design'
+    | '/api/public/v1/designs/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
+  ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +98,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1DesignRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/designs/$id': {
+      id: '/api/public/v1/designs/$id'
+      path: '/api/public/v1/designs/$id'
+      fullPath: '/api/public/v1/designs/$id'
+      preLoaderRoute: typeof ApiPublicV1DesignsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +112,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiChatRoute: ApiChatRoute,
   ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
+  ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
