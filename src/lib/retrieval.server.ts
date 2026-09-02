@@ -33,13 +33,21 @@ export async function searchKnowledge(
   supabase: SupabaseClient<Database>,
   query: string,
   limit = 6,
+  /** Required when the client bypasses RLS (service role / API-key requests). */
+  ownerId?: string,
 ): Promise<KnowledgeHit[]> {
   const [embedding] = await embedTexts([query]);
   if (!embedding) return [];
-  const { data, error } = await supabase.rpc("match_document_chunks", {
-    query_embedding: JSON.stringify(embedding),
-    match_count: limit,
-  });
+  const { data, error } = ownerId
+    ? await supabase.rpc("match_document_chunks_for_user", {
+        p_user_id: ownerId,
+        query_embedding: JSON.stringify(embedding),
+        match_count: limit,
+      })
+    : await supabase.rpc("match_document_chunks", {
+        query_embedding: JSON.stringify(embedding),
+        match_count: limit,
+      });
   if (error) throw new Error(error.message);
   return (data ?? []) as KnowledgeHit[];
 }
