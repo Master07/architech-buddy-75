@@ -86,7 +86,9 @@ export const Route = createFileRoute("/api/public/v1/design")({
           // --- Default: durable queue. The request returns immediately with an
           // id; a worker generates the document, so no request can time out.
           const { design, job } = await enqueueDesignJob(base);
-          runInBackground(drainDesignQueue(1));
+          // Wake the worker in-process: also re-claims any job a previous worker left
+          // stalled, which is why no scheduled sweep is needed.
+          runInBackground(drainDesignQueue(3));
           return Response.json(
             {
               design,
