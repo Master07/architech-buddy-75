@@ -1,12 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { authenticateRequest, AuthError } from "@/lib/supabase-request.server";
-import {
-  createDesignRecord,
-  generateDesign,
-  streamDesignInto,
-  type DesignJobParams,
-} from "@/lib/design-generate.server";
+import { createDesignRecord, streamDesignInto, type DesignJobParams } from "@/lib/design-generate.server";
+import { drainDesignQueue, enqueueDesignJob } from "@/lib/design-queue.server";
 import { runInBackground } from "@/lib/background.server";
 
 const CORS = {
@@ -20,8 +16,6 @@ const Body = z.object({
   mode: z.enum(["design", "review", "stack", "interview"]).default("design"),
   /** Stream the document as Server-Sent Events while it is written. */
   stream: z.boolean().default(false),
-  /** false → return 202 with a design id immediately and generate in the background. */
-  wait: z.boolean().default(true),
 });
 
 function sse(event: string, data: unknown) {
@@ -43,19 +37,19 @@ export const Route = createFileRoute("/api/public/v1/design")({
             );
           }
 
-          const job: DesignJobParams = {
+          const base = {
             supabase: auth.supabase,
             userId: auth.userId,
             mode: parsed.data.mode,
             prompt: parsed.data.prompt,
-            source: auth.via === "api_key" ? "api" : "app",
+            source: (auth.via === "api_key" ? "api" : "app") as DesignJobParams["source"],
             ...(auth.via === "api_key" ? { ownerScope: auth.userId } : {}),
           };
 
           // --- Streaming: bytes keep flowing, so long documents never idle out.
           if (parsed.data.stream) {
-            const created = await createDesignRecord(job);
-            const { textStream, finished } = await streamDesignInto(job, created.id);
+            const created = await createDesignRecord(base);
+            const { textStream, finished } = await streamDesignInto(base, created.id);
             const encoder = new TextEncoder();
 
             const body = new ReadableStream<Uint8Array>({
@@ -89,22 +83,18 @@ export const Route = createFileRoute("/api/public/v1/design")({
             });
           }
 
-          // --- Async: hand back an id now, poll GET /api/public/v1/designs/:id.
-          if (!parsed.data.wait) {
-            const created = await createDesignRecord(job);
-            runInBackground(
-              streamDesignInto(job, created.id).then(({ finished }) => finished),
-            );
-            return Response.json(
-              { design: created, poll: `/api/public/v1/designs/${created.id}` },
-              { status: 202, headers: CORS },
-            );
-          }
-
-          // --- Buffered (default, backwards compatible). Long docs may hit
-          // client/proxy timeouts; prefer `stream` or `wait: false` for those.
-          const design = await generateDesign(job);
-          return Response.json({ design }, { headers: CORS });
+          // --- Default: durable queue. The request returns immediately with an
+          // id; a worker generates the document, so no request can time out.
+          const { design, job } = await enqueueDesignJob(base);
+          runInBackground(drainDesignQueue(1));
+          return Response.json(
+            {
+              design,
+              job: { id: job.id, status: job.status },
+              poll: `/api/public/v1/designs/${design.id}`,
+            },
+            { status: 202, headers: { ...CORS, "X-Design-Id": design.id } },
+          );
         } catch (error) {
           const status = error instanceof AuthError ? error.status : 500;
           console.error("[api/v1/design]", error);
