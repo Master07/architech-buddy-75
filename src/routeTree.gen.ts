@@ -23,6 +23,7 @@ import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/de
 import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
 import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
 import { Route as ApiPublicV1DesignsIdRouteImport } from './routes/api/public/v1/designs.$id'
+import { Route as ApiPublicV1JobsDesignRouteImport } from './routes/api/public/v1/jobs.design'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -94,6 +95,11 @@ const ApiPublicV1DesignsIdRoute = ApiPublicV1DesignsIdRouteImport.update({
   path: '/api/public/v1/designs/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicV1JobsDesignRoute = ApiPublicV1JobsDesignRouteImport.update({
+  id: '/api/public/v1/jobs/design',
+  path: '/api/public/v1/jobs/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
+  '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
   '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
+  '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
   '/api/public/v1/designs': typeof ApiPublicV1DesignsIndexRoute
 }
 export interface FileRoutesById {
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
+  '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
   '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
 }
 export interface FileRouteTypes {
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
     | '/api/public/v1/designs/$id'
+    | '/api/public/v1/jobs/design'
     | '/api/public/v1/designs/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
     | '/api/public/v1/designs/$id'
+    | '/api/public/v1/jobs/design'
     | '/api/public/v1/designs'
   id:
     | '__root__'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
     | '/api/public/v1/designs/$id'
+    | '/api/public/v1/jobs/design'
     | '/api/public/v1/designs/'
   fileRoutesById: FileRoutesById
 }
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
   ApiPublicV1KnowledgeRoute: typeof ApiPublicV1KnowledgeRoute
   ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
+  ApiPublicV1JobsDesignRoute: typeof ApiPublicV1JobsDesignRoute
   ApiPublicV1DesignsIndexRoute: typeof ApiPublicV1DesignsIndexRoute
 }
 
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1DesignsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/v1/jobs/design': {
+      id: '/api/public/v1/jobs/design'
+      path: '/api/public/v1/jobs/design'
+      fullPath: '/api/public/v1/jobs/design'
+      preLoaderRoute: typeof ApiPublicV1JobsDesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -341,6 +361,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
   ApiPublicV1KnowledgeRoute: ApiPublicV1KnowledgeRoute,
   ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,
+  ApiPublicV1JobsDesignRoute: ApiPublicV1JobsDesignRoute,
   ApiPublicV1DesignsIndexRoute: ApiPublicV1DesignsIndexRoute,
 }
 export const routeTree = rootRouteImport

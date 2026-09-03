@@ -22,7 +22,16 @@ export const Route = createFileRoute("/api/public/v1/designs/$id")({
             .maybeSingle();
           if (error) throw new Error(error.message);
           if (!data) return Response.json({ error: "Not found" }, { status: 404, headers: CORS });
-          return Response.json({ design: data }, { headers: CORS });
+
+          const { data: job } = await auth.supabase
+            .from("design_jobs")
+            .select("id, status, attempts, max_attempts, last_error")
+            .eq("design_id", params.id)
+            .eq("user_id", auth.userId)
+            .maybeSingle();
+
+          return Response.json({ design: data, job: job ?? null }, { headers: CORS });
+
         } catch (error) {
           const status = error instanceof AuthError ? error.status : 500;
           return Response.json({ error: (error as Error).message }, { status, headers: CORS });

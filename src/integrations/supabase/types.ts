@@ -47,6 +47,65 @@ export type Database = {
         }
         Relationships: []
       }
+      design_jobs: {
+        Row: {
+          attempts: number
+          bypass_rls: boolean
+          created_at: string
+          design_id: string
+          id: string
+          last_error: string | null
+          locked_at: string | null
+          max_attempts: number
+          mode: string
+          prompt: string
+          source: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          bypass_rls?: boolean
+          created_at?: string
+          design_id: string
+          id?: string
+          last_error?: string | null
+          locked_at?: string | null
+          max_attempts?: number
+          mode: string
+          prompt: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          bypass_rls?: boolean
+          created_at?: string
+          design_id?: string
+          id?: string
+          last_error?: string | null
+          locked_at?: string | null
+          max_attempts?: number
+          mode?: string
+          prompt?: string
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "design_jobs_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       designs: {
         Row: {
           created_at: string
@@ -274,6 +333,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_design_job: {
+        Args: never
+        Returns: {
+          attempts: number
+          bypass_rls: boolean
+          created_at: string
+          design_id: string
+          id: string
+          last_error: string | null
+          locked_at: string | null
+          max_attempts: number
+          mode: string
+          prompt: string
+          source: string
+          status: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "design_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       match_document_chunks: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
