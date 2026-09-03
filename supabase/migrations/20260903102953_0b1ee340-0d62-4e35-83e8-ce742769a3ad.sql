@@ -1,0 +1,1 @@
+select cron.unschedule('design-queue-recovery-sweep');
