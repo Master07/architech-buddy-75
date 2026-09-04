@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { runDesignAgent } from "./agent-run.server";
+import { runDesignPipeline } from "./agent-run.server";
 import type { DesignMode } from "./design-agent";
 
 function extractTitle(prompt: string, markdown: string) {
