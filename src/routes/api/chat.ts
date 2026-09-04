@@ -123,8 +123,18 @@ export const Route = createFileRoute("/api/chat")({
             },
             onError: (error) => {
               console.error("[chat]", error);
-              return (error as Error).message ?? "Generation failed";
+              const message = (error as Error)?.message ?? "Generation failed";
+              // The staged pipeline is token-heavy; surfacing the real cause
+              // beats "No output generated".
+              if (/payment required|402/i.test(message)) {
+                return "AI credits are exhausted, so the pipeline stopped mid-run. Top up or wait for the daily allowance to reset, then retry.";
+              }
+              if (/rate.?limit|429/i.test(message)) {
+                return "The model is rate limited right now. Retry in a moment.";
+              }
+              return message;
             },
+
           });
 
           return createUIMessageStreamResponse({ stream });
