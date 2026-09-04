@@ -14,11 +14,13 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiReviewRouteImport } from './routes/api/review'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppThreadIdRouteImport } from './routes/_authenticated/app.$threadId'
 import { Route as AuthenticatedAppApiRouteImport } from './routes/_authenticated/app.api'
 import { Route as AuthenticatedAppDesignsRouteImport } from './routes/_authenticated/app.designs'
 import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authenticated/app.library'
+import { Route as AuthenticatedAppReviewRouteImport } from './routes/_authenticated/app.review'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
 import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
 import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
@@ -49,6 +51,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiReviewRoute = ApiReviewRouteImport.update({
+  id: '/api/review',
+  path: '/api/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -73,6 +80,11 @@ const AuthenticatedAppDesignsRoute = AuthenticatedAppDesignsRouteImport.update({
 const AuthenticatedAppLibraryRoute = AuthenticatedAppLibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
+const AuthenticatedAppReviewRoute = AuthenticatedAppReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
 const ApiPublicV1DesignRoute = ApiPublicV1DesignRouteImport.update({
@@ -106,10 +118,12 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/api/review': typeof ApiReviewRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
   '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app/review': typeof AuthenticatedAppReviewRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -121,10 +135,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/review': typeof ApiReviewRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
   '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app/review': typeof AuthenticatedAppReviewRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -139,10 +155,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
+  '/api/review': typeof ApiReviewRoute
   '/_authenticated/app/$threadId': typeof AuthenticatedAppThreadIdRoute
   '/_authenticated/app/api': typeof AuthenticatedAppApiRoute
   '/_authenticated/app/designs': typeof AuthenticatedAppDesignsRoute
   '/_authenticated/app/library': typeof AuthenticatedAppLibraryRoute
+  '/_authenticated/app/review': typeof AuthenticatedAppReviewRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -157,10 +175,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app'
     | '/api/chat'
+    | '/api/review'
     | '/app/$threadId'
     | '/app/api'
     | '/app/designs'
     | '/app/library'
+    | '/app/review'
     | '/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -172,10 +192,12 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/api/chat'
+    | '/api/review'
     | '/app/$threadId'
     | '/app/api'
     | '/app/designs'
     | '/app/library'
+    | '/app/review'
     | '/app'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -189,10 +211,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/app'
     | '/api/chat'
+    | '/api/review'
     | '/_authenticated/app/$threadId'
     | '/_authenticated/app/api'
     | '/_authenticated/app/designs'
     | '/_authenticated/app/library'
+    | '/_authenticated/app/review'
     | '/_authenticated/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -206,6 +230,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiReviewRoute: typeof ApiReviewRoute
   ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
   ApiPublicV1KnowledgeRoute: typeof ApiPublicV1KnowledgeRoute
   ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
@@ -250,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/review': {
+      id: '/api/review'
+      path: '/api/review'
+      fullPath: '/api/review'
+      preLoaderRoute: typeof ApiReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
       path: '/'
@@ -283,6 +315,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/app/library'
       preLoaderRoute: typeof AuthenticatedAppLibraryRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/review': {
+      id: '/_authenticated/app/review'
+      path: '/review'
+      fullPath: '/app/review'
+      preLoaderRoute: typeof AuthenticatedAppReviewRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/api/public/v1/design': {
@@ -328,6 +367,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppApiRoute: typeof AuthenticatedAppApiRoute
   AuthenticatedAppDesignsRoute: typeof AuthenticatedAppDesignsRoute
   AuthenticatedAppLibraryRoute: typeof AuthenticatedAppLibraryRoute
+  AuthenticatedAppReviewRoute: typeof AuthenticatedAppReviewRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -336,6 +376,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppApiRoute: AuthenticatedAppApiRoute,
   AuthenticatedAppDesignsRoute: AuthenticatedAppDesignsRoute,
   AuthenticatedAppLibraryRoute: AuthenticatedAppLibraryRoute,
+  AuthenticatedAppReviewRoute: AuthenticatedAppReviewRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
@@ -358,6 +399,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiReviewRoute: ApiReviewRoute,
   ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
   ApiPublicV1KnowledgeRoute: ApiPublicV1KnowledgeRoute,
   ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,

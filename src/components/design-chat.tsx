@@ -13,7 +13,8 @@ import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/componen
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MODE_META, type DesignMode } from "@/lib/design-agent";
+import { MODE_META, type DesignMode, type GateResult } from "@/lib/design-agent";
+import { GateScorecard } from "@/components/gate-scorecard";
 import { saveDesign } from "@/lib/designs.functions";
 import { ArrowUp, Compass, Save, Square } from "lucide-react";
 import { toast } from "sonner";
@@ -71,12 +72,18 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
 
   async function save() {
     if (!lastAssistant) return;
-    // The pipeline streams draft, critique and final as separate parts; only the
-    // last one is the document worth saving.
+    // The pipeline streams every stage as its own part; the server marks the
+    // document worth saving with an explicit data part.
+    const documentPart = [...lastAssistant.parts]
+      .reverse()
+      .find((part) => part.type === "data-document") as
+      | { data: { markdown: string } }
+      | undefined;
     const texts = lastAssistant.parts
       .filter((part) => part.type === "text")
       .map((part) => (part as { text: string }).text);
-    const markdown = texts[texts.length - 1] ?? "";
+    const markdown = documentPart?.data.markdown ?? texts[texts.length - 1] ?? "";
+
 
     if (!markdown.trim()) {
       toast.error("Nothing to save yet.");
@@ -134,6 +141,30 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
                         <MessageResponse key={index}>{(part as { text: string }).text}</MessageResponse>
                       );
                     }
+                    if (part.type === "data-stage") {
+                      const stage = (part as { data: { label: string; status: string } }).data;
+                      return (
+                        <p
+                          key={index}
+                          className="label-mono mt-4 flex items-center gap-2 text-muted-foreground"
+                        >
+                          <span
+                            className={`size-1.5 rounded-full ${
+                              stage.status === "done" ? "bg-primary" : "bg-amber-500"
+                            }`}
+                          />
+                          {stage.label}
+                        </p>
+                      );
+                    }
+                    if (part.type === "data-gates") {
+                      const payload = (part as { data: { gates: GateResult[]; score: number } })
+                        .data;
+                      return (
+                        <GateScorecard key={index} gates={payload.gates} score={payload.score} />
+                      );
+                    }
+                    if (part.type === "data-document") return null;
                     if (part.type === "tool-search_design_knowledge") {
                       const toolPart = part as unknown as {
                         state: "input-streaming" | "input-available" | "output-available" | "output-error";
@@ -141,6 +172,7 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
                         output?: unknown;
                         errorText?: string;
                       };
+
                       return (
                         <Tool key={index} className="my-2">
                           <ToolHeader

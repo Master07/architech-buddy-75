@@ -4,11 +4,24 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { createLovableAiGatewayProvider, requireLovableApiKey } from "./ai-gateway.server";
 import {
+  CANDIDATES_PROMPT,
+  CAPACITY_PROMPT,
   CHAT_MODEL,
   CRITIC_PROMPT,
+  DRAFT_FROM_STAGES_PROMPT,
+  GATE_CHECK_PROMPT,
+  INTERVIEW_SCORE_PROMPT,
+  REQUIREMENTS_PROMPT,
   REVISION_PROMPT,
+  VALIDATION_PROMPT,
+  failingGates,
+  gateRepairPrompt,
+  gateScore,
+  parseGateBlock,
+  stripGateBlock,
   systemPrompt,
   type DesignMode,
+  type GateResult,
 } from "./design-agent";
 import { searchKnowledge } from "./retrieval.server";
 import { formatEvidenceBundle, loadThreadEvidence, type EvidenceItem } from "./evidence.server";
@@ -111,9 +124,9 @@ export async function runDesignAgent(options: AgentRunOptions) {
 
 /**
  * A draft alone is a fluent answer; the blueprint's quality comes from attacking
- * it. Documents therefore go through draft -> adversarial critique -> revision.
- * Short conversational turns (interview questions, clarifications) skip the
- * extra passes, because there is nothing substantial to attack yet.
+ * it. Documents therefore go through the full staged pipeline. Short
+ * conversational turns (interview questions, clarifications) take the interview
+ * scoring path instead, because there is nothing substantial to attack yet.
  */
 export function warrantsCritique(text: string) {
   const trimmed = text.trim();
@@ -122,7 +135,33 @@ export function warrantsCritique(text: string) {
   return headings >= 3;
 }
 
-export type PipelineStage = "draft" | "critique" | "final";
+export const PIPELINE_STAGES = [
+  "requirements",
+  "capacity",
+  "candidates",
+  "draft",
+  "critique",
+  "validation",
+  "final",
+  "gatecheck",
+  "repair",
+  "interview-score",
+] as const;
+
+export type PipelineStage = (typeof PIPELINE_STAGES)[number];
+
+export const STAGE_LABEL: Record<PipelineStage, string> = {
+  requirements: "Requirements ledger",
+  capacity: "Capacity envelope",
+  candidates: "Candidate architectures",
+  draft: "Draft package",
+  critique: "Adversarial review board",
+  validation: "Validation engine",
+  final: "Revision",
+  gatecheck: "Gate enforcement",
+  repair: "Gate repair",
+  "interview-score": "Question scoring",
+};
 
 export type StageRun = {
   stage: PipelineStage;
@@ -134,19 +173,26 @@ export type PipelineHandlers = {
   onStage?: (run: StageRun) => void;
   /** Called when a stage's text is complete. */
   onStageEnd?: (stage: PipelineStage, text: string) => void;
+  /** Called once gates have been scored (and again after a repair pass). */
+  onGates?: (gates: GateResult[], score: number) => void;
 };
 
 export type PipelineOutcome = {
+  stages: Partial<Record<PipelineStage, string>>;
   draft: string;
   critique: string | null;
   final: string;
+  gates: GateResult[];
+  gateScore: number;
   /** The document to persist and show as the answer. */
   document: string;
 };
 
 /**
- * Runs the full blueprint pipeline. Every stage streams, so bytes keep flowing
- * on the edge runtime no matter how long the document takes.
+ * Runs the full blueprint pipeline: requirements -> capacity -> candidates ->
+ * draft -> critic -> validation -> revise -> gate enforcement. Every stage
+ * streams, so bytes keep flowing on the edge runtime no matter how long the
+ * document takes.
  */
 export async function runDesignPipeline(
   options: AgentRunOptions,
@@ -162,6 +208,7 @@ export async function runDesignPipeline(
     hasEvidence: evidence.length > 0,
   });
   const tools = buildTools(options, libraryReady, evidence);
+  const stages: Partial<Record<PipelineStage, string>> = {};
 
   const runStage = async (stage: PipelineStage, messages: ModelMessage[]) => {
     const result = streamText({
@@ -173,34 +220,118 @@ export async function runDesignPipeline(
     });
     handlers.onStage?.({ stage, result });
     const text = await result.text;
+    stages[stage] = text;
     handlers.onStageEnd?.(stage, text);
     return text;
   };
 
-  const draft = await runStage("draft", options.messages);
+  const turn = (
+    history: ModelMessage[],
+    instruction: string,
+  ): ModelMessage[] => [...history, { role: "user", content: instruction }];
 
-  if (!warrantsCritique(draft)) {
-    return { draft, critique: null, final: draft, document: draft };
+  let history: ModelMessage[] = [...options.messages];
+  const append = (assistant: string, instruction: string) => {
+    history = [...turn(history, instruction), { role: "assistant", content: assistant }];
+  };
+
+  // Modes that produce an architecture get the analytical pre-stages. Review and
+  // stack advice start from the user's own material, so they skip straight to a
+  // draft and are attacked from there.
+  const usesPreStages = options.mode === "design" || options.mode === "stack";
+
+  let draft: string;
+  if (usesPreStages) {
+    const requirements = await runStage("requirements", turn(history, REQUIREMENTS_PROMPT));
+    append(requirements, REQUIREMENTS_PROMPT);
+
+    const capacity = await runStage("capacity", turn(history, CAPACITY_PROMPT));
+    append(capacity, CAPACITY_PROMPT);
+
+    const candidates = await runStage("candidates", turn(history, CANDIDATES_PROMPT));
+    append(candidates, CANDIDATES_PROMPT);
+
+    draft = await runStage("draft", turn(history, DRAFT_FROM_STAGES_PROMPT));
+    append(draft, DRAFT_FROM_STAGES_PROMPT);
+  } else {
+    draft = await runStage("draft", history);
+    history = [...history, { role: "assistant", content: draft }];
   }
 
-  const withDraft: ModelMessage[] = [
-    ...options.messages,
-    { role: "assistant", content: draft },
-  ];
+  // An interview round is a set of questions, not a document: score the round
+  // against the gates instead of attacking a design that does not exist yet.
+  if (!warrantsCritique(draft)) {
+    if (options.mode === "interview") {
+      const scored = await runStage("interview-score", turn(history, INTERVIEW_SCORE_PROMPT));
+      const gates = parseGateBlock(scored);
+      handlers.onGates?.(gates, gateScore(gates));
+      const revised = scored.match(/##\s*Revised Round\s*\n([\s\S]*?)(?=\n##\s|$)/i)?.[1]?.trim();
+      const document = stripGateBlock(revised && revised.length > 80 ? revised : draft);
+      return {
+        stages,
+        draft,
+        critique: null,
+        final: document,
+        gates,
+        gateScore: gateScore(gates),
+        document,
+      };
+    }
+    return {
+      stages,
+      draft,
+      critique: null,
+      final: draft,
+      gates: [],
+      gateScore: 0,
+      document: draft,
+    };
+  }
 
-  const critique = await runStage("critique", [
-    ...withDraft,
-    { role: "user", content: CRITIC_PROMPT },
-  ]);
+  const critique = await runStage("critique", turn(history, CRITIC_PROMPT));
+  append(critique, CRITIC_PROMPT);
 
-  const final = await runStage("final", [
-    ...withDraft,
-    { role: "user", content: CRITIC_PROMPT },
-    { role: "assistant", content: critique },
-    { role: "user", content: REVISION_PROMPT },
-  ]);
+  const validation = await runStage("validation", turn(history, VALIDATION_PROMPT));
+  append(validation, VALIDATION_PROMPT);
 
-  return { draft, critique, final, document: final };
+  let final = await runStage("final", turn(history, REVISION_PROMPT));
+  history = [...turn(history, REVISION_PROMPT), { role: "assistant", content: final }];
+
+  // Enforcement: the document does not return until the gates have been scored,
+  // and one repair pass is spent on whatever still fails.
+  const check = await runStage("gatecheck", turn(history, GATE_CHECK_PROMPT));
+  let gates = parseGateBlock(check);
+  handlers.onGates?.(gates, gateScore(gates));
+
+  const failed = failingGates(gates);
+  if (failed.length > 0) {
+    history = [...turn(history, GATE_CHECK_PROMPT), { role: "assistant", content: check }];
+    const repairInstruction = gateRepairPrompt(failed);
+    const repaired = await runStage("repair", turn(history, repairInstruction));
+    if (repaired.trim().length > 500) {
+      final = repaired;
+      history = [...turn(history, repairInstruction), { role: "assistant", content: repaired }];
+      const recheck = await runStage("gatecheck", turn(history, GATE_CHECK_PROMPT));
+      const rescored = parseGateBlock(recheck);
+      if (rescored.length > 0) {
+        gates = rescored;
+        handlers.onGates?.(gates, gateScore(gates));
+      }
+    }
+  }
+
+  const document = stripGateBlock(final);
+
+  return {
+    stages,
+    draft,
+    critique,
+    final: document,
+    gates,
+    gateScore: gateScore(gates),
+    document,
+  };
 }
 
 export { createLovableAiGatewayProvider };
+
