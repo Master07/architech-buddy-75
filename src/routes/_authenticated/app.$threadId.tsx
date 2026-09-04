@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UIMessage } from "ai";
 import { DesignChat } from "@/components/design-chat";
+import { EvidencePanel } from "@/components/evidence-panel";
+
 import { getThread, renameThread } from "@/lib/threads.functions";
 import { DESIGN_MODES, type DesignMode } from "@/lib/design-agent";
 
@@ -52,7 +54,9 @@ function ThreadPage() {
             {mode}
           </span>
         </div>
+        <EvidencePanel threadId={threadId} />
       </header>
+
       <div className="min-h-0 flex-1">
         <DesignChat
           key={threadId}

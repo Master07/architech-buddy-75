@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { runDesignAgent } from "./agent-run.server";
+import { runDesignPipeline } from "./agent-run.server";
 import type { DesignMode } from "./design-agent";
 
 function extractTitle(prompt: string, markdown: string) {
@@ -70,32 +70,68 @@ async function markFailed(params: DesignJobParams, designId: string, error: unkn
 }
 
 /**
- * Runs the agent for an already-created design row and returns the live text
- * stream plus a `finished` promise that persists the result. Callers that pipe
- * the stream to the client keep bytes flowing, which is what prevents platform
- * request timeouts on long documents.
+ * Runs the full draft -> critique -> revision pipeline for an already-created
+ * design row and returns the live text stream plus a `finished` promise that
+ * persists the final document. Callers that pipe the stream to the client keep
+ * bytes flowing, which is what prevents platform request timeouts.
  */
 export async function streamDesignInto(params: DesignJobParams, designId: string) {
-  const { result } = await runDesignAgent({
-    supabase: params.supabase,
-    userId: params.userId,
-    mode: params.mode,
-    messages: [{ role: "user", content: params.prompt }],
-    ...(params.ownerScope ? { ownerScope: params.ownerScope } : {}),
-  });
+  const chunks: Array<string | null> = [];
+  let notify: (() => void) | null = null;
+  const push = (value: string | null) => {
+    chunks.push(value);
+    notify?.();
+    notify = null;
+  };
+
+  const outcome = runDesignPipeline(
+    {
+      supabase: params.supabase,
+      userId: params.userId,
+      mode: params.mode,
+      messages: [{ role: "user", content: params.prompt }],
+      ...(params.threadId ? { threadId: params.threadId } : {}),
+      ...(params.ownerScope ? { ownerScope: params.ownerScope } : {}),
+    },
+    {
+      onStage: ({ stage, result }) => {
+        push(`\n\n<!-- stage:${stage} -->\n\n`);
+        void (async () => {
+          for await (const delta of result.textStream) push(delta);
+        })().catch(() => {});
+      },
+    },
+  );
 
   const finished = (async () => {
     try {
-      const markdown = await result.text;
-      return await finishDesign(params, designId, markdown);
+      const { document } = await outcome;
+      return await finishDesign(params, designId, document);
     } catch (error) {
       await markFailed(params, designId, error);
       throw error;
+    } finally {
+      push(null);
     }
   })();
 
-  return { textStream: result.textStream, finished };
+  async function* textStream() {
+    for (;;) {
+      if (chunks.length === 0) {
+        await new Promise<void>((resolve) => {
+          notify = resolve;
+        });
+        continue;
+      }
+      const next = chunks.shift();
+      if (next === null || next === undefined) return;
+      yield next;
+    }
+  }
+
+  return { textStream: textStream(), finished };
 }
+
 
 /**
  * Runs the agent to completion (streamed on the wire, buffered for the caller)
