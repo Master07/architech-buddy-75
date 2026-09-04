@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { listThreads, createThread } from "@/lib/threads.functions";
 import { Button } from "@/components/ui/button";
 import { MODE_META, type DesignMode } from "@/lib/design-agent";
-import { BookOpen, FileText, GitBranch, KeyRound, LogOut, Plus } from "lucide-react";
+import { BookOpen, FileText, Gauge, GitBranch, KeyRound, LogOut, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_authenticated/app")({
 
 const NAV = [
   { to: "/app/designs", label: "Designs", icon: FileText },
+  { to: "/app/review", label: "Review a doc", icon: Gauge },
   { to: "/app/library", label: "Library", icon: BookOpen },
   { to: "/app/api", label: "API access", icon: KeyRound },
 ] as const;

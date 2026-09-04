@@ -252,48 +252,241 @@ CURRENT MODE: ${MODE_META[mode].label}
 ${MODE_PROMPTS[mode]}`;
 }
 
-/** Stage 2: adversarial review board + validation engine. */
-export const CRITIC_PROMPT = `You are the FAILURE CRITIC and VALIDATION ENGINE reviewing a draft your colleague just produced. You did not write it and you owe it no loyalty. Your job is to find what is wrong before the user sees it.
+/* ------------------------------------------------------------------ *
+ * Blueprint acceptance gates
+ * ------------------------------------------------------------------ */
 
-Run two passes.
+export type Gate = { id: string; label: string; test: string };
 
-PASS 1 - ADVERSARIAL REVIEW BOARD. Answer each seat in one or two sharp sentences, naming a concrete defect or writing "No objection":
+export const GATES: Gate[] = [
+  {
+    id: "G1",
+    label: "Requirement coverage",
+    test: "Every critical requirement - functional, traffic, quality, recovery (RPO/RTO), constraints, governance - has a design response or an explicit open decision.",
+  },
+  {
+    id: "G2",
+    label: "Calculation integrity",
+    test: "Every material number reproduces from stated inputs and a visible formula.",
+  },
+  {
+    id: "G3",
+    label: "Claim labelling",
+    test: "Material claims carry Verified / Calculated / Assumed / Recommended / Unknown, and nothing is Verified without attached system evidence naming its source.",
+  },
+  {
+    id: "G4",
+    label: "Scored alternatives",
+    test: "At least two credible architectures are scored against the same constraints; the loser is not a straw man.",
+  },
+  {
+    id: "G5",
+    label: "Failure coverage",
+    test: "Every high-severity failure has detection, containment, verified recovery and an owner, including correlated failure.",
+  },
+  {
+    id: "G6",
+    label: "Interface and async contracts",
+    test: "Idempotency, ordering scope, DLQ, replay and retry-safety are specified for every async path and mutating API.",
+  },
+  {
+    id: "G7",
+    label: "Scaling triggers",
+    test: "Scaling triggers have numeric thresholds, observation windows and the structural change they justify.",
+  },
+  {
+    id: "G8",
+    label: "Rollout and rollback",
+    test: "Implementation phases have measurable exit criteria and a rollback path.",
+  },
+  {
+    id: "G9",
+    label: "Security, tenancy and governance",
+    test: "Trust boundaries, tenant isolation, data classification, retention/residency and auditability are addressed.",
+  },
+  {
+    id: "G10",
+    label: "Justified complexity and depth",
+    test: "Complexity is paid for by a measured constraint, there is no unsupported certainty, and depth matches the problem.",
+  },
+];
+
+export const GATE_BY_ID: Record<string, Gate> = Object.fromEntries(
+  GATES.map((gate) => [gate.id, gate]),
+);
+
+const GATE_LIST = GATES.map((gate) => `${gate.id} ${gate.label}: ${gate.test}`).join("\n");
+
+/**
+ * Every gate-scoring stage emits this machine-readable block so the app can
+ * enforce the gates instead of trusting prose.
+ */
+export const GATE_BLOCK_SPEC = `Finish your output with a fenced block tagged \`gates\`, one line per gate, in this exact pipe format:
+
+\`\`\`gates
+G1 | PASS | one short sentence of evidence or the offending text
+G2 | FAIL | ...
+\`\`\`
+
+Verdicts are PASS, PARTIAL or FAIL only. Include every gate id exactly once.
+
+GATES:
+${GATE_LIST}`;
+
+export type GateVerdict = "PASS" | "PARTIAL" | "FAIL";
+export type GateResult = { id: string; label: string; verdict: GateVerdict; note: string };
+
+/** Parses the fenced `gates` block a scoring stage emits. */
+export function parseGateBlock(text: string): GateResult[] {
+  const block = text.match(/```gates\s*\n([\s\S]*?)```/i)?.[1];
+  if (!block) return [];
+  const results: GateResult[] = [];
+  for (const line of block.split("\n")) {
+    const parts = line.split("|").map((part) => part.trim());
+    if (parts.length < 2) continue;
+    const id = (parts[0] ?? "").toUpperCase();
+    const gate = GATE_BY_ID[id];
+    if (!gate) continue;
+    const raw = (parts[1] ?? "").toUpperCase();
+    const verdict: GateVerdict = raw.startsWith("PASS")
+      ? "PASS"
+      : raw.startsWith("PARTIAL")
+        ? "PARTIAL"
+        : "FAIL";
+    results.push({ id, label: gate.label, verdict, note: parts.slice(2).join(" | ") });
+  }
+  return results;
+}
+
+export function gateScore(results: GateResult[]) {
+  if (results.length === 0) return 0;
+  const points = results.reduce(
+    (total, result) =>
+      total + (result.verdict === "PASS" ? 1 : result.verdict === "PARTIAL" ? 0.5 : 0),
+    0,
+  );
+  return Math.round((points / results.length) * 100);
+}
+
+export function failingGates(results: GateResult[]) {
+  return results.filter((result) => result.verdict !== "PASS");
+}
+
+/** Strips the machine block so the reader never sees it. */
+export function stripGateBlock(text: string) {
+  return text.replace(/```gates\s*\n[\s\S]*?```/gi, "").trimEnd();
+}
+
+/* ------------------------------------------------------------------ *
+ * Staged pipeline prompts
+ * ------------------------------------------------------------------ */
+
+export const REQUIREMENTS_PROMPT = `STAGE 1 - REQUIREMENTS. Do not design anything yet.
+Extract and commit the requirement set only:
+- Functional scope and explicit non-goals
+- Traffic shape: users, read/write ratio, average and peak QPS, burst duration, growth horizon, geographic distribution
+- Quality: p50/p95/p99 latency targets, availability, durability, consistency invariants per path
+- Recovery: RPO, RTO, failover scope
+- Constraints: budget, team size and skills, deadline, existing stack
+- Governance: privacy, retention, residency, auditability, abuse prevention
+Every line carries a claim label. Anything the user did not state becomes a numbered assumption A1, A2 ... with impact and validation trigger. If system evidence is attached, read it first and mark what it verifies.
+Output a compact markdown list under the heading "## Requirements Ledger". No architecture, no technology names.`;
+
+export const CAPACITY_PROMPT = `STAGE 2 - CAPACITY. Using only the requirements ledger above, compute the numbers that constrain the architecture.
+For each: formula, inputs, result, and a one-line implication. Cover peak QPS, storage per year, working-set and cache size, bandwidth including egress, connection and thread counts, replication and safety-margin multipliers, and the order-of-magnitude monthly cost driver.
+Label each result **Calculated** and state that these are order-of-magnitude sanity checks. Flag any number that a missing input makes unknowable as **Unknown**.
+Output under the heading "## Capacity Envelope".`;
+
+export const CANDIDATES_PROMPT = `STAGE 3 - CANDIDATES. Propose two or three genuinely credible architectures that could satisfy the ledger and the capacity envelope. Straw men are a failure.
+For each: one-paragraph shape, the constraint it optimises, where it breaks first, and its operational burden.
+Then score them in a decision matrix table: Option | Fit to constraints | Cost | Operational burden | Verdict, and name the winner with the deciding trade-off and what would flip it.
+Output under the heading "## Candidate Architectures". Do not write the full design yet.`;
+
+export const DRAFT_FROM_STAGES_PROMPT = `STAGE 4 - DRAFT. Now write the decision package for the winning candidate, carrying the ledger, the capacity envelope and the decision matrix forward verbatim where they belong. Do not re-derive numbers differently from stage 2; if a number was wrong, correct it and say so in one line.
+Use the decision package structure from your instructions, at the depth the problem deserves.`;
+
+/** Stage 5: adversarial review board. */
+export const CRITIC_PROMPT = `STAGE 5 - ADVERSARIAL REVIEW BOARD. You are reviewing a draft your colleague just produced. You did not write it and you owe it no loyalty. Find what is wrong before the user sees it.
+
+Answer each seat in one or two sharp sentences, naming a concrete defect or writing "No objection":
 - SRE: how does it fail, degrade and recover? What fails when retries multiply traffic? Which dependency can exhaust threads, memory, connections or queue capacity? What happens if telemetry, control plane or operator access is also impaired? Is recovery verified or merely initiated?
-- Security: what are the trust boundaries, plausible attack paths, preventive controls, detection signals and retained evidence? How can this be abused?
+- Security: trust boundaries, plausible attack paths, preventive controls, detection signals, retained evidence, abuse potential.
 - Database: which access pattern becomes expensive, hot or inconsistent? Can a partial write violate a business invariant? How do schemas evolve and old data expire?
 - Application: can the team actually implement and test this cleanly?
 - Finance: what drives cost at normal load, and what does cost do during a failure?
 - Product: does this protect the real user journey, including while degraded?
 - Compliance: which obligations, retention, residency or audit evidence are unresolved?
 
-PASS 2 - VALIDATION. Check mechanically and report each as PASS or FAIL with the specific offending text:
-1. Every material calculation reproduces from its stated inputs. Redo the arithmetic yourself and flag any number that does not.
-2. Every material claim carries a correct label (Verified / Calculated / Assumed / Recommended / Unknown), and nothing is labelled Verified without attached system evidence naming its source.
-3. Every stated requirement has a design response or an explicit open decision.
-4. At least two credible alternatives were compared against the same constraints, and the loser was not a straw man.
-5. Every high-severity failure has detection, containment, recovery and an owner.
-6. Implementation phases have measurable exit criteria and rollback paths.
-7. Scaling triggers have numeric thresholds and observation windows.
-8. Complexity is justified by a measured constraint, not fashion. Flag any unearned microservice, queue, cache, cluster or exotic datastore.
-9. No unsupported certainty about the user's org, systems, budget or team.
-10. Depth matches the problem: flag bureaucratic padding as well as missing sections.
-
 Output ONLY:
 ## Board Findings
-## Validation
 ## Must Fix
-A numbered list, severity-ordered, each entry naming the exact section to change and the change to make. Write "None" if the draft genuinely passes.
-Be concise and specific. Do not rewrite the document here.`;
+A numbered, severity-ordered list; each entry names the exact section to change and the change to make. Write "None" if the draft genuinely passes. Do not rewrite the document.`;
 
-/** Stage 3: revise the draft against the critique. */
-export const REVISION_PROMPT = `Produce the FINAL version of your document, resolving every Must Fix item from the review.
+/** Stage 6: mechanical validation against the gates. */
+export const VALIDATION_PROMPT = `STAGE 6 - VALIDATION ENGINE. Check the draft mechanically against the acceptance gates. Redo the arithmetic yourself; do not take a number on trust.
+
+Output:
+## Validation
+A table: Gate | Verdict | Offending text or evidence.
+## Required Corrections
+A numbered list of the exact edits needed to turn every FAIL and PARTIAL into a PASS. Write "None" if all gates pass.
+
+${GATE_BLOCK_SPEC}`;
+
+/** Stage 7: revise the draft against critique + validation. */
+export const REVISION_PROMPT = `STAGE 7 - REVISION. Produce the FINAL version of the document, resolving every Must Fix item and every Required Correction.
 
 Rules:
 - Output the complete final document and nothing else. No preamble, no changelog, no meta-commentary about the review.
 - Fix the arithmetic that failed validation rather than deleting the number.
-- Where a Must Fix item exposes something you genuinely cannot know, convert it into a labelled **Unknown** or **Assumed** entry with a validation trigger, and make sure it appears in Risks and Open Decisions.
+- Where a correction exposes something you genuinely cannot know, convert it into a labelled **Unknown** or **Assumed** entry with a validation trigger, and list it under Risks and Open Decisions.
 - If the reviewer flagged unearned complexity, remove it and say in one line what would justify adding it back.
 - Do not pad. Depth must still match the problem.`;
 
+/** Stage 8: the gate that actually blocks the document from returning. */
+export const GATE_CHECK_PROMPT = `STAGE 8 - GATE ENFORCEMENT. Score the FINAL document above against the acceptance gates. Be strict: a gate only passes if the document contains the evidence, not an intention to provide it.
+
+Output a short "## Gate Report" table: Gate | Verdict | Evidence.
+
+${GATE_BLOCK_SPEC}`;
+
+export function gateRepairPrompt(failed: GateResult[]) {
+  return `Some acceptance gates did not pass:
+
+${failed.map((gate) => `- ${gate.id} ${gate.label}: ${gate.verdict} - ${gate.note}`).join("\n")}
+
+Emit the corrected FINAL document, fixing exactly these gates and changing nothing else. Output the complete document and nothing else. If a gate genuinely cannot pass without information you do not have, add a labelled **Unknown** entry under Risks and Open Decisions naming what is needed - that is the acceptable resolution.`;
+}
+
+/** Interview mode: score each question the agent asked against the gates. */
+export const INTERVIEW_SCORE_PROMPT = `You just asked the user a round of interview questions. Score that round before it reaches them.
+
+Output "## Question Scorecard": a table with columns Question | Gate it serves | Architecture-changing? | Score /5 | Verdict.
+A question scores 5 only if its answer would move the consistency model, trust boundary, regional topology, primary storage, transaction boundary, recovery objective or availability design. Anything that could reasonably be a labelled assumption instead scores 2 or less and is marked "should be an assumption".
+Then output "## Coverage": which gates this round leaves unaddressed, and the single most valuable question you failed to ask.
+Finally output "## Revised Round": the corrected question list - drop or replace every question scoring 3 or less, keep it to at most 5 questions, and append the assumptions you are making instead, numbered with impact and validation trigger.
+
+${GATE_BLOCK_SPEC}
+Score the gates by whether this interview round is on track to satisfy them, not whether a document exists yet.`;
+
+/** Uploaded-document review: score against the gates and claim labels. */
+export const DOCUMENT_REVIEW_PROMPT = `You are reviewing an EXISTING design document the user uploaded. Score it against the blueprint.
+
+Output in this order:
+## Verdict
+One paragraph plus an overall score out of 10 with a one-line justification.
+## Gate Report
+A table: Gate | Verdict | Evidence or offending text. Cover every gate.
+## Claim Audit
+A table: Claim | Stated as | Should be (Verified / Calculated / Assumed / Recommended / Unknown) | Why. Focus on unsupported certainty, numbers with no derivation, and anything asserted about production without evidence.
+## Critical Issues
+Ordered by severity: what breaks, under what conditions, blast radius, what to do instead.
+## Recommended Changes
+Ordered and concrete, each with effort S/M/L and a measurable exit criterion.
+If the document is thin, review what is there and name precisely what is missing.
+
+${GATE_BLOCK_SPEC}`;
+
 export const CHAT_MODEL = "google/gemini-3.1-pro-preview";
 export const EMBEDDING_MODEL = "openai/text-embedding-3-small";
+
