@@ -52,7 +52,9 @@ function ThreadPage() {
             {mode}
           </span>
         </div>
+        <EvidencePanel threadId={threadId} />
       </header>
+
       <div className="min-h-0 flex-1">
         <DesignChat
           key={threadId}
