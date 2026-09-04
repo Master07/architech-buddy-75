@@ -151,6 +151,13 @@
  * ------------------------------------------------------------------------- */
 
 @theme inline {
+  --radius-sm: 0rem;
+  --radius-md: 0rem;
+  --radius-lg: 0rem;
+  --radius-xl: 0rem;
+  --radius-2xl: 0rem;
+  --radius-3xl: 0rem;
+  --radius-4xl: 0rem;
   --font-sans: "DotGothic16", "JetBrains Mono", ui-monospace, monospace;
   --font-display: "Press Start 2P", "DotGothic16", ui-monospace, monospace;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
