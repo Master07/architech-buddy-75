@@ -144,59 +144,72 @@
 }
 
 /* ---------------------------------------------------------------------------
- * System Design Architect — "Cloud Technical Blueprint" design system.
- * Single light theme: paper-white surfaces, cool slate borders, blue accent.
- * Headings/labels in JetBrains Mono, prose in Work Sans.
+ * System Design Architect — "Graph Paper Pixel" design system.
+ * Engineering-notebook paper, navy pixel ink, orange marker accents,
+ * square corners, hard 2px borders and offset shadows.
+ * Headings in Press Start 2P, body in DotGothic16, code in JetBrains Mono.
  * ------------------------------------------------------------------------- */
 
 @theme inline {
-  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --radius-sm: 0rem;
+  --radius-md: 0rem;
+  --radius-lg: 0rem;
+  --radius-xl: 0rem;
+  --radius-2xl: 0rem;
+  --radius-3xl: 0rem;
+  --radius-4xl: 0rem;
+  --font-sans: "DotGothic16", "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Press Start 2P", "DotGothic16", ui-monospace, monospace;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-blueprint: var(--blueprint);
   --color-signal: var(--signal);
   --color-caution: var(--caution);
   --color-surface: var(--surface);
+  --color-grid: var(--grid);
+  --shadow-pixel: 4px 4px 0 0 var(--ink-shadow);
+  --shadow-pixel-sm: 2px 2px 0 0 var(--ink-shadow);
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.987 0.002 248);
-  --foreground: oklch(0.279 0.041 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.279 0.041 260);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.279 0.041 260);
-  --primary: oklch(0.623 0.214 259);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.938 0.007 248);
-  --secondary-foreground: oklch(0.279 0.041 260);
-  --muted: oklch(0.938 0.007 248);
-  --muted-foreground: oklch(0.58 0.035 256);
-  --accent: oklch(0.938 0.007 248);
-  --accent-foreground: oklch(0.208 0.042 265);
-  --destructive: oklch(0.577 0.219 27);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.938 0.007 248);
-  --input: oklch(0.916 0.011 250);
-  --ring: oklch(0.623 0.214 259 / 35%);
-  --surface: oklch(0.938 0.007 248);
-  --blueprint: oklch(0.623 0.214 259);
-  --signal: oklch(0.6 0.13 155);
-  --caution: oklch(0.66 0.14 62);
-  --chart-1: oklch(0.623 0.214 259);
-  --chart-2: oklch(0.6 0.13 155);
-  --chart-3: oklch(0.66 0.14 62);
-  --chart-4: oklch(0.6 0.16 300);
-  --chart-5: oklch(0.6 0.18 20);
-  --sidebar: oklch(0.987 0.002 248);
-  --sidebar-foreground: oklch(0.279 0.041 260);
-  --sidebar-primary: oklch(0.623 0.214 259);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.938 0.007 248);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265);
-  --sidebar-border: oklch(0.938 0.007 248);
-  --sidebar-ring: oklch(0.623 0.214 259 / 35%);
+  --radius: 0rem;
+  --background: oklch(0.982 0.004 250);
+  --foreground: oklch(0.32 0.11 265);
+  --card: oklch(0.995 0.002 250);
+  --card-foreground: oklch(0.32 0.11 265);
+  --popover: oklch(0.995 0.002 250);
+  --popover-foreground: oklch(0.32 0.11 265);
+  --primary: oklch(0.36 0.13 266);
+  --primary-foreground: oklch(0.99 0.003 250);
+  --secondary: oklch(0.94 0.012 250);
+  --secondary-foreground: oklch(0.32 0.11 265);
+  --muted: oklch(0.94 0.012 250);
+  --muted-foreground: oklch(0.46 0.06 262);
+  --accent: oklch(0.72 0.17 55);
+  --accent-foreground: oklch(0.25 0.09 265);
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.99 0.003 250);
+  --border: oklch(0.36 0.13 266 / 45%);
+  --input: oklch(0.36 0.13 266 / 45%);
+  --ring: oklch(0.72 0.17 55 / 60%);
+  --ink-shadow: oklch(0.36 0.13 266 / 28%);
+  --grid: oklch(0.55 0.13 258 / 16%);
+  --surface: oklch(0.94 0.012 250);
+  --blueprint: oklch(0.36 0.13 266);
+  --signal: oklch(0.55 0.14 155);
+  --caution: oklch(0.72 0.17 55);
+  --chart-1: oklch(0.36 0.13 266);
+  --chart-2: oklch(0.72 0.17 55);
+  --chart-3: oklch(0.55 0.14 155);
+  --chart-4: oklch(0.55 0.16 300);
+  --chart-5: oklch(0.55 0.18 20);
+  --sidebar: oklch(0.995 0.002 250);
+  --sidebar-foreground: oklch(0.32 0.11 265);
+  --sidebar-primary: oklch(0.36 0.13 266);
+  --sidebar-primary-foreground: oklch(0.99 0.003 250);
+  --sidebar-accent: oklch(0.94 0.012 250);
+  --sidebar-accent-foreground: oklch(0.32 0.11 265);
+  --sidebar-border: oklch(0.36 0.13 266 / 30%);
+  --sidebar-ring: oklch(0.72 0.17 55 / 60%);
 }
 
 @layer base {
@@ -206,7 +219,15 @@
 
   body {
     font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: none;
+    image-rendering: pixelated;
+    background-color: var(--color-background);
+    background-image:
+      linear-gradient(to right, var(--grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
   h1,
@@ -214,32 +235,67 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
+    line-height: 1.35;
+    text-transform: uppercase;
+  }
+
+  h1 { font-size: clamp(1.5rem, 3.4vw, 2.6rem); }
+  h2 { font-size: clamp(1.05rem, 2vw, 1.4rem); }
+  h3 { font-size: 1rem; }
+  h4 { font-size: 0.85rem; }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: var(--caution);
+    color: var(--primary);
   }
 }
 
 @utility grid-paper {
   background-image:
-    linear-gradient(to right, oklch(0.623 0.214 259 / 5%) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.623 0.214 259 / 5%) 1px, transparent 1px);
-  background-size: 32px 32px;
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 @utility dot-paper {
-  background-image: radial-gradient(oklch(0.623 0.214 259 / 12%) 1px, transparent 1px);
+  background-image: radial-gradient(var(--grid) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 
 @utility label-mono {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-family: var(--font-display);
+  font-size: 0.5625rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 @utility panel {
   background-color: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 2px solid var(--color-border);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 0 var(--ink-shadow);
+}
+
+@utility pixel-shadow {
+  box-shadow: 4px 4px 0 0 var(--ink-shadow);
+}
+
+@utility marker-highlight {
+  background: linear-gradient(
+    to bottom,
+    transparent 12%,
+    var(--caution) 12%,
+    var(--caution) 88%,
+    transparent 88%
+  );
+  padding: 0 0.35rem;
 }
