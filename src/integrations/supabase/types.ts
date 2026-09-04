@@ -47,6 +47,47 @@ export type Database = {
         }
         Relationships: []
       }
+      context_items: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          thread_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          kind?: string
+          label: string
+          thread_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          thread_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "context_items_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       design_jobs: {
         Row: {
           attempts: number
