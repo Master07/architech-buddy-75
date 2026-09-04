@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Copy, Download, Maximize2, Minus, Plus, RotateCcw, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -121,13 +121,10 @@ export function MermaidDiagram({ code, isIncomplete }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const lastRendered = useRef("");
 
   useEffect(() => {
     if (isIncomplete || !code.trim()) return;
-    if (lastRendered.current === code) return;
     let cancelled = false;
-    lastRendered.current = code;
     renderMermaid(code)
       .then((result) => {
         if (!cancelled) {
