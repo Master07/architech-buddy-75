@@ -321,7 +321,13 @@ export const MessageBranchPage = ({
 
 export type MessageResponseProps = ComponentProps<typeof Streamdown>;
 
-const streamdownPlugins = { cjk, code, math, mermaid };
+const streamdownPlugins = {
+  cjk,
+  code,
+  math,
+  mermaid,
+  renderers: [{ language: "mermaid", component: MermaidDiagram }],
+};
 
 export const MessageResponse = memo(
   ({ className, ...props }: MessageResponseProps) => (
@@ -334,6 +340,7 @@ export const MessageResponse = memo(
       {...props}
     />
   ),
+
   (prevProps, nextProps) =>
     prevProps.children === nextProps.children &&
     nextProps.isAnimating === prevProps.isAnimating
