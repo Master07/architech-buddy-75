@@ -71,10 +71,13 @@ export function DesignChat({ threadId, mode, initialMessages, onFirstMessage }: 
 
   async function save() {
     if (!lastAssistant) return;
-    const markdown = lastAssistant.parts
+    // The pipeline streams draft, critique and final as separate parts; only the
+    // last one is the document worth saving.
+    const texts = lastAssistant.parts
       .filter((part) => part.type === "text")
-      .map((part) => (part as { text: string }).text)
-      .join("\n\n");
+      .map((part) => (part as { text: string }).text);
+    const markdown = texts[texts.length - 1] ?? "";
+
     if (!markdown.trim()) {
       toast.error("Nothing to save yet.");
       return;
