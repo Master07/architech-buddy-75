@@ -143,15 +143,14 @@ function Landing() {
           <div className="grid gap-6 md:grid-cols-2">
             {FEATURES.map((feature) => (
               <div key={feature.title} className="panel p-8">
-                <div className="grid size-10 place-items-center rounded bg-secondary text-primary">
-                  <feature.icon className="size-5" />
-                </div>
-                <h2 className="mt-6 text-lg font-bold tracking-tight">{feature.title}</h2>
+                <feature.icon className="size-6" />
+                <h2 className="mt-6 text-base">{feature.title}</h2>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.body}</p>
               </div>
             ))}
           </div>
         </section>
+
 
         <section className="border-t border-border bg-card">
           <div className="mx-auto max-w-6xl px-6 py-16">
