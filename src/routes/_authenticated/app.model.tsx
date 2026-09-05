@@ -92,7 +92,7 @@ function ModelPage() {
   async function test() {
     setBusy(true);
     try {
-      const result = await testAiProvider({ data: {} });
+      const result = await testAiProvider();
       if (result.ok) toast.success(result.message);
       else toast.error(result.message);
     } catch (error) {
@@ -195,7 +195,7 @@ function ModelPage() {
                 <Button
                   variant="ghost"
                   onClick={async () => {
-                    await deleteAiProvider({ data: {} });
+                    await deleteAiProvider();
                     setApiKey("");
                     await provider.refetch();
                     toast.success("Removed. Back on the built-in AI.");
