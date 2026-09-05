@@ -20,6 +20,7 @@ const NAV = [
   { to: "/app/review", label: "Review a doc", icon: Gauge },
   { to: "/app/library", label: "Library", icon: BookOpen },
   { to: "/app/api", label: "API access", icon: KeyRound },
+  { to: "/app/model", label: "AI model", icon: Cpu },
 ] as const;
 
 function AppShell() {
