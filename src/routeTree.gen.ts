@@ -20,6 +20,7 @@ import { Route as AuthenticatedAppThreadIdRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppApiRouteImport } from './routes/_authenticated/app.api'
 import { Route as AuthenticatedAppDesignsRouteImport } from './routes/_authenticated/app.designs'
 import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authenticated/app.library'
+import { Route as AuthenticatedAppModelRouteImport } from './routes/_authenticated/app.model'
 import { Route as AuthenticatedAppReviewRouteImport } from './routes/_authenticated/app.review'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
 import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
@@ -82,6 +83,11 @@ const AuthenticatedAppLibraryRoute = AuthenticatedAppLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppModelRoute = AuthenticatedAppModelRouteImport.update({
+  id: '/model',
+  path: '/model',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppReviewRoute = AuthenticatedAppReviewRouteImport.update({
   id: '/review',
   path: '/review',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app/model': typeof AuthenticatedAppModelRoute
   '/app/review': typeof AuthenticatedAppReviewRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
   '/app/library': typeof AuthenticatedAppLibraryRoute
+  '/app/model': typeof AuthenticatedAppModelRoute
   '/app/review': typeof AuthenticatedAppReviewRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/_authenticated/app/api': typeof AuthenticatedAppApiRoute
   '/_authenticated/app/designs': typeof AuthenticatedAppDesignsRoute
   '/_authenticated/app/library': typeof AuthenticatedAppLibraryRoute
+  '/_authenticated/app/model': typeof AuthenticatedAppModelRoute
   '/_authenticated/app/review': typeof AuthenticatedAppReviewRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/app/api'
     | '/app/designs'
     | '/app/library'
+    | '/app/model'
     | '/app/review'
     | '/app/'
     | '/api/public/v1/design'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/app/api'
     | '/app/designs'
     | '/app/library'
+    | '/app/model'
     | '/app/review'
     | '/app'
     | '/api/public/v1/design'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/api'
     | '/_authenticated/app/designs'
     | '/_authenticated/app/library'
+    | '/_authenticated/app/model'
     | '/_authenticated/app/review'
     | '/_authenticated/app/'
     | '/api/public/v1/design'
@@ -317,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppLibraryRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/model': {
+      id: '/_authenticated/app/model'
+      path: '/model'
+      fullPath: '/app/model'
+      preLoaderRoute: typeof AuthenticatedAppModelRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/review': {
       id: '/_authenticated/app/review'
       path: '/review'
@@ -367,6 +386,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppApiRoute: typeof AuthenticatedAppApiRoute
   AuthenticatedAppDesignsRoute: typeof AuthenticatedAppDesignsRoute
   AuthenticatedAppLibraryRoute: typeof AuthenticatedAppLibraryRoute
+  AuthenticatedAppModelRoute: typeof AuthenticatedAppModelRoute
   AuthenticatedAppReviewRoute: typeof AuthenticatedAppReviewRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
@@ -376,6 +396,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppApiRoute: AuthenticatedAppApiRoute,
   AuthenticatedAppDesignsRoute: AuthenticatedAppDesignsRoute,
   AuthenticatedAppLibraryRoute: AuthenticatedAppLibraryRoute,
+  AuthenticatedAppModelRoute: AuthenticatedAppModelRoute,
   AuthenticatedAppReviewRoute: AuthenticatedAppReviewRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }

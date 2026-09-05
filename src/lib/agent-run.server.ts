@@ -2,11 +2,11 @@ import { stepCountIs, streamText, tool, type ModelMessage } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { createLovableAiGatewayProvider, requireLovableApiKey } from "./ai-gateway.server";
+import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { resolveChatProvider } from "./ai-provider.server";
 import {
   CANDIDATES_PROMPT,
   CAPACITY_PROMPT,
-  CHAT_MODEL,
   CRITIC_PROMPT,
   DRAFT_FROM_STAGES_PROMPT,
   GATE_CHECK_PROMPT,
@@ -105,14 +105,15 @@ function buildTools(
 /** Single-pass draft. Kept for callers that only need one generation. */
 export async function runDesignAgent(options: AgentRunOptions) {
   const { mode, messages, runId } = options;
-  const gateway = createLovableAiGatewayProvider(requireLovableApiKey(), runId);
+  const resolved = await resolveChatProvider(options.supabase, options.userId, runId);
+  const gateway = resolved.gateway;
   const [libraryReady, evidence] = await Promise.all([
     hasLibrary(options.supabase, options.userId),
     resolveEvidence(options),
   ]);
 
   const result = streamText({
-    model: gateway(CHAT_MODEL),
+    model: resolved.model,
     system: systemPrompt(mode, { hasLibrary: libraryReady, hasEvidence: evidence.length > 0 }),
     messages,
     tools: buildTools(options, libraryReady, evidence),
@@ -198,7 +199,7 @@ export async function runDesignPipeline(
   options: AgentRunOptions,
   handlers: PipelineHandlers = {},
 ): Promise<PipelineOutcome> {
-  const gateway = createLovableAiGatewayProvider(requireLovableApiKey(), options.runId);
+  const resolved = await resolveChatProvider(options.supabase, options.userId, options.runId);
   const [libraryReady, evidence] = await Promise.all([
     hasLibrary(options.supabase, options.userId),
     resolveEvidence(options),
@@ -212,7 +213,7 @@ export async function runDesignPipeline(
 
   const runStage = async (stage: PipelineStage, messages: ModelMessage[]) => {
     const result = streamText({
-      model: gateway(CHAT_MODEL),
+      model: resolved.model,
       system,
       messages,
       tools,
