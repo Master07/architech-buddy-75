@@ -59,63 +59,72 @@ const FEATURES = [
 function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-border bg-background">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="grid size-7 place-items-center rounded bg-primary">
-              <GitBranch className="size-4 text-primary-foreground" />
+            <div className="grid size-7 place-items-center border border-border">
+              <GitBranch className="size-4 text-foreground" />
             </div>
-            <span className="font-display text-sm font-bold tracking-tight">ARCHITECT_OS</span>
+            <span className="font-display text-sm tracking-tight">SDA</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-6">
+            <span className="signal-dot label-mono hidden text-foreground sm:block">Home</span>
             <Button asChild size="sm" variant="ghost">
-              <Link to="/auth">Documentation</Link>
+              <Link to="/auth" className="label-mono">
+                Docs
+              </Link>
             </Button>
             <Button asChild size="sm">
-              <Link to="/auth">Sign in</Link>
+              <Link to="/auth" className="label-mono">
+                Sign in
+              </Link>
             </Button>
           </div>
         </div>
       </header>
 
       <main>
-        <section className="grid-paper border-b border-border">
-          <div className="mx-auto flex max-w-4xl flex-col items-center px-6 py-24 text-center">
-            <span className="label-mono rounded-full border border-border bg-card px-3 py-1 text-primary">
-              Design before implementation
-            </span>
-            <h1 className="mt-6 text-balance text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl">
-              System Design <span className="text-primary">Architect</span>
+        <section className="border-b border-border">
+          <div className="mx-auto max-w-6xl px-6 py-24">
+            <h1 className="max-w-3xl text-balance leading-[1.15]">
+              System Design
+              <br />
+              Architect
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-              Most AI tools hand you a diagram and a confident shrug. This one runs the interview,
-              does the capacity arithmetic out loud, commits to a recommendation, and names the
-              alternative it rejected.
-            </p>
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <div className="mt-8 space-y-1 text-base text-muted-foreground">
+              <p>Design scalable systems.</p>
+              <p>Make informed architectural decisions.</p>
+              <p>Build with clarity and confidence.</p>
+            </div>
+            <div className="mt-10 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/auth">
+                <Link to="/auth" className="label-mono">
                   Start a design <ArrowRight className="ml-1 size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/auth">View the API</Link>
+                <Link to="/auth" className="label-mono">
+                  View the API
+                </Link>
               </Button>
             </div>
 
-            <div className="mt-20 grid w-full gap-10 border-t border-border pt-12 md:grid-cols-3">
+            <div className="mt-20 grid w-full gap-px border-t border-border bg-border pt-px md:grid-cols-3">
               {BAND.map((item) => (
-                <div key={item.title} className="flex flex-col items-center gap-2">
-                  <div className="grid size-10 place-items-center rounded bg-secondary text-primary">
-                    <item.icon className="size-5" />
+                <div key={item.title} className="flex gap-4 bg-background px-1 py-10 md:px-6">
+                  <item.icon className="mt-1 size-6 shrink-0" />
+                  <div>
+                    <h2 className="label-mono">{item.title}</h2>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {item.body}
+                    </p>
                   </div>
-                  <h2 className="label-mono text-muted-foreground">{item.title}</h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{item.body}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
+
 
         <section className="border-b border-border bg-card">
           <div className="mx-auto grid max-w-6xl gap-px bg-border md:grid-cols-4">
