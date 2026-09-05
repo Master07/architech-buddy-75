@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { stepCountIs, streamText } from "ai";
 import { authenticateRequest, AuthError } from "@/lib/supabase-request.server";
-import { createLovableAiGatewayProvider, requireLovableApiKey } from "@/lib/ai-gateway.server";
-import { CHAT_MODEL, DOCUMENT_REVIEW_PROMPT, systemPrompt } from "@/lib/design-agent";
+import { resolveChatProvider } from "@/lib/ai-provider.server";
+import { DOCUMENT_REVIEW_PROMPT, systemPrompt } from "@/lib/design-agent";
 
 /**
  * Scores an uploaded design document against the blueprint's acceptance gates.
@@ -13,8 +13,9 @@ export const Route = createFileRoute("/api/review")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        let auth;
         try {
-          await authenticateRequest(request);
+          auth = await authenticateRequest(request);
         } catch (error) {
           const status = error instanceof AuthError ? error.status : 401;
           return Response.json({ error: (error as Error).message }, { status });
@@ -26,9 +27,9 @@ export const Route = createFileRoute("/api/review")({
           return Response.json({ error: "No document content supplied." }, { status: 400 });
         }
 
-        const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
+        const resolved = await resolveChatProvider(auth.supabase, auth.userId);
         const result = streamText({
-          model: gateway(CHAT_MODEL),
+          model: resolved.model,
           system: systemPrompt("review", { hasLibrary: false, hasEvidence: false }),
           messages: [
             {

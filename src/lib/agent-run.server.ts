@@ -2,12 +2,11 @@ import { stepCountIs, streamText, tool, type ModelMessage } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { createLovableAiGatewayProvider, requireLovableApiKey } from "./ai-gateway.server";
+import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 import { resolveChatProvider } from "./ai-provider.server";
 import {
   CANDIDATES_PROMPT,
   CAPACITY_PROMPT,
-  CHAT_MODEL,
   CRITIC_PROMPT,
   DRAFT_FROM_STAGES_PROMPT,
   GATE_CHECK_PROMPT,
