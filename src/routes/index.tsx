@@ -154,9 +154,8 @@ function Landing() {
 
         <section className="border-t border-border bg-card">
           <div className="mx-auto max-w-6xl px-6 py-16">
-            <h2 className="text-2xl font-bold tracking-tight">
-              Where it is strong, and where it is not
-            </h2>
+            <h2>Where it is strong, and where it is not</h2>
+
             <div className="mt-8 grid gap-8 md:grid-cols-2">
               <div>
                 <p className="label-mono text-[color:var(--color-signal)]">Reliable</p>
