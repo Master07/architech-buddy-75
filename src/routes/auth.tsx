@@ -37,9 +37,33 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app" });
-    });
+    let cancelled = false;
+
+    async function bootstrap() {
+      // Full-page OAuth redirects come back with tokens in the hash or query.
+      const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const search = new URLSearchParams(window.location.search);
+      const access_token = hash.get("access_token") ?? search.get("access_token");
+      const refresh_token = hash.get("refresh_token") ?? search.get("refresh_token");
+      const oauthError = hash.get("error_description") ?? search.get("error_description");
+
+      if (oauthError) {
+        toast.error(oauthError);
+        window.history.replaceState({}, "", window.location.pathname);
+      } else if (access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+        window.history.replaceState({}, "", window.location.pathname);
+        if (error) toast.error(error.message);
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (!cancelled && data.session) navigate({ to: "/app" });
+    }
+
+    void bootstrap();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   async function submit(event: React.FormEvent) {
