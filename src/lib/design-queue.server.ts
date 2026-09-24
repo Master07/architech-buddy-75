@@ -75,12 +75,12 @@ export async function processNextDesignJob(): Promise<boolean> {
   };
 
   try {
-    let done = 0;
+    let stageCount = 0;
     const { finished } = await streamDesignInto(params, job.design_id, {
       onStage: (stage) => {
         const now = new Date().toISOString();
-        const stagesDone = done;
-        done += 1;
+        const stagesDone = stageCount;
+        stageCount += 1;
         void db
           .from("design_jobs")
           .update({ current_stage: stage, stages_done: stagesDone, stage_started_at: now, updated_at: now })
@@ -93,7 +93,7 @@ export async function processNextDesignJob(): Promise<boolean> {
     const now = new Date().toISOString();
     const { data: done } = await db
       .from("design_jobs")
-      .update({ status: "succeeded", locked_at: null, finished_at: now, updated_at: now, current_stage: null, stages_done: done })
+      .update({ status: "succeeded", locked_at: null, finished_at: now, updated_at: now, current_stage: null, stages_done: stageCount })
       .eq("id", job.id)
       .eq("status", "running")
       .select("id");
