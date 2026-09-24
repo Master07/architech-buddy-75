@@ -71,21 +71,16 @@ export async function processNextDesignJob(): Promise<boolean> {
   const cancellationCheck = setInterval(() => {
     if (checkingCancellation) return;
     checkingCancellation = true;
-    void db
-      .from("design_jobs")
-      .select("status")
-      .eq("id", job.id)
-      .maybeSingle()
-      .then(({ data: current }) => {
-        if (current?.status === "cancelled") {
-          cancelled = true;
-          abortController.abort("Cancelled by user");
-        }
-      })
-      .catch(() => undefined)
-      .finally(() => {
+    void Promise.resolve(
+      db.from("design_jobs").select("status").eq("id", job.id).maybeSingle(),
+    ).then(({ data: current }) => {
+      if (current?.status === "cancelled") {
+        cancelled = true;
+        abortController.abort("Cancelled by user");
+      }
+    }, () => undefined).finally(() => {
         checkingCancellation = false;
-      });
+    });
   }, 1000);
 
   const params: DesignJobParams = {

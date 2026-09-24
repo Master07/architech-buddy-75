@@ -123,7 +123,7 @@ export async function runDesignAgent(options: AgentRunOptions) {
     messages,
     tools: buildTools(options, libraryReady, evidence),
     stopWhen: stepCountIs(50),
-    abortSignal: options.abortSignal,
+    ...(options.abortSignal ? { abortSignal: options.abortSignal } : {}),
   });
 
   return { result, gateway };
@@ -225,7 +225,7 @@ export async function runDesignPipeline(
       messages,
       tools,
       stopWhen: stepCountIs(50),
-      abortSignal: options.abortSignal,
+      ...(options.abortSignal ? { abortSignal: options.abortSignal } : {}),
     });
     handlers.onStage?.({ stage, result });
     const text = await result.text;
