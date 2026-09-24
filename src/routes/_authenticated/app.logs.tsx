@@ -75,7 +75,7 @@ function LogsPage() {
                 const started = j.started_at ? new Date(j.started_at).getTime() : null;
                 const finished = j.finished_at ? new Date(j.finished_at).getTime() : null;
                 const active = j.status === "queued" || j.status === "running";
-                const waited = (started ?? (active ? now : finished ?? now)) - created;
+                const waited = started ? started - created : active ? now - created : null;
                 const ran = started ? (finished ?? (active ? now : started)) - started : null;
                 return (
                   <tr key={j.id} className="border-t border-border align-top">
@@ -96,7 +96,7 @@ function LogsPage() {
                         {j.status}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap p-2">{fmt(Math.max(0, waited))}</td>
+                    <td className="whitespace-nowrap p-2">{waited == null ? "—" : fmt(Math.max(0, waited))}</td>
                     <td className="whitespace-nowrap p-2">{ran == null ? "—" : fmt(Math.max(0, ran))}</td>
                     <td className="whitespace-nowrap p-2 text-right">
                       {active ? (
