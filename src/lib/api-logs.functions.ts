@@ -161,8 +161,7 @@ export const resubmitApiJob = createServerFn({ method: "POST" })
     if (job.status === "queued" || job.status === "running") {
       throw new Error("Cancel this active request before resubmitting it");
     }
-    const { enqueueDesignJob, drainDesignQueue } = await import("./design-queue.server");
-    const { runInBackground } = await import("./background.server");
+    const { enqueueDesignJob } = await import("./design-queue.server");
     const { design, job: created } = await enqueueDesignJob({
       supabase: context.supabase,
       userId: context.userId,
@@ -173,6 +172,5 @@ export const resubmitApiJob = createServerFn({ method: "POST" })
     });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("design_jobs").update({ resubmitted_from: job.id }).eq("id", created.id);
-    runInBackground(drainDesignQueue(1));
     return { designId: design.id, jobId: created.id };
   });

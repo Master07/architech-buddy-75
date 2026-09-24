@@ -353,3 +353,119 @@ export async function runDesignPipeline(
 
 export { createLovableAiGatewayProvider };
 
+// ---------------------------------------------------------------------------
+// Checkpointed pipeline: the same stages as runDesignPipeline, but one stage per
+// call. Saved outputs are the only state, so any worker can resume from them.
+// ---------------------------------------------------------------------------
+
+/** Saved outputs keyed by step. "recheck" is the second gate check after a repair. */
+export type SavedStages = Partial<Record<PipelineStage | "recheck", string>>;
+
+type StepPlan =
+  | { done: false; key: keyof SavedStages; stage: PipelineStage; messages: ModelMessage[] }
+  | { done: true; document: string };
+
+export function planNextStep(mode: DesignMode, prompt: string, s: SavedStages): StepPlan {
+  const turn = (h: ModelMessage[], instruction: string): ModelMessage[] => [...h, { role: "user", content: instruction }];
+  let history: ModelMessage[] = [{ role: "user", content: prompt }];
+  const append = (assistant: string, instruction: string) => {
+    history = [...turn(history, instruction), { role: "assistant", content: assistant }];
+  };
+  const step = (key: keyof SavedStages, stage: PipelineStage, messages: ModelMessage[]): StepPlan => ({ done: false, key, stage, messages });
+
+  if (mode === "design" || mode === "stack") {
+    const pre: Array<[PipelineStage, string]> = [
+      ["requirements", REQUIREMENTS_PROMPT],
+      ["capacity", CAPACITY_PROMPT],
+      ["candidates", CANDIDATES_PROMPT],
+      ["draft", DRAFT_FROM_STAGES_PROMPT],
+    ];
+    for (const [stage, instruction] of pre) {
+      const out = s[stage];
+      if (out === undefined) return step(stage, stage, turn(history, instruction));
+      append(out, instruction);
+    }
+  } else {
+    if (s.draft === undefined) return step("draft", "draft", history);
+    history = [...history, { role: "assistant", content: s.draft }];
+  }
+  const draft = s.draft!;
+
+  if (!warrantsCritique(draft)) {
+    if (mode === "interview") {
+      if (s["interview-score"] === undefined) return step("interview-score", "interview-score", turn(history, INTERVIEW_SCORE_PROMPT));
+      const revised = s["interview-score"].match(/##\s*Revised Round\s*\n([\s\S]*?)(?=\n##\s|$)/i)?.[1]?.trim();
+      return { done: true, document: stripGateBlock(revised && revised.length > 80 ? revised : draft) };
+    }
+    return { done: true, document: draft };
+  }
+
+  const chain: Array<[PipelineStage, string]> = [
+    ["critique", CRITIC_PROMPT],
+    ["validation", VALIDATION_PROMPT],
+  ];
+  for (const [stage, instruction] of chain) {
+    const out = s[stage];
+    if (out === undefined) return step(stage, stage, turn(history, instruction));
+    append(out, instruction);
+  }
+  if (s.final === undefined) return step("final", "final", turn(history, REVISION_PROMPT));
+  let final = s.final;
+  history = [...turn(history, REVISION_PROMPT), { role: "assistant", content: final }];
+
+  if (s.gatecheck === undefined) return step("gatecheck", "gatecheck", turn(history, GATE_CHECK_PROMPT));
+  const failed = failingGates(parseGateBlock(s.gatecheck));
+  if (failed.length > 0) {
+    history = [...turn(history, GATE_CHECK_PROMPT), { role: "assistant", content: s.gatecheck }];
+    const repairInstruction = gateRepairPrompt(failed);
+    if (s.repair === undefined) return step("repair", "repair", turn(history, repairInstruction));
+    if (s.repair.trim().length > 500) {
+      final = s.repair;
+      history = [...turn(history, repairInstruction), { role: "assistant", content: s.repair }];
+      if (s.recheck === undefined) return step("recheck", "gatecheck", turn(history, GATE_CHECK_PROMPT));
+    }
+  }
+  return { done: true, document: stripGateBlock(final) };
+}
+
+/** Runs exactly one stage and returns its text. Throws on provider errors. */
+export async function runSingleStage(
+  options: AgentRunOptions,
+  stage: PipelineStage,
+  messages: ModelMessage[],
+  onStart?: () => void,
+) {
+  const resolved = await resolveChatProvider(options.supabase, options.userId, options.runId);
+  const [libraryReady, evidence] = await Promise.all([
+    hasLibrary(options.supabase, options.userId),
+    resolveEvidence(options),
+  ]);
+  const startedAt = Date.now();
+  let streamError: unknown = null;
+  onStart?.();
+  const result = streamText({
+    model: resolved.model,
+    system: systemPrompt(options.mode, { hasLibrary: libraryReady, hasEvidence: evidence.length > 0 }),
+    messages,
+    tools: buildTools(options, libraryReady, evidence),
+    stopWhen: stepCountIs(50),
+    onError: ({ error }) => {
+      streamError = error;
+    },
+    ...(options.abortSignal ? { abortSignal: options.abortSignal } : {}),
+  });
+  const text = await result.text;
+  if (streamError) throw streamError;
+  if (options.usage) {
+    const usage = await Promise.resolve(result.totalUsage).catch(() => undefined);
+    await recordUsage(options.userId, options.usage, {
+      stage,
+      model: resolved.modelId,
+      ...(usage ? { usage } : {}),
+      durationMs: Date.now() - startedAt,
+    });
+  }
+  if (!text.trim()) throw new Error(`The AI returned an empty ${stage} step`);
+  return text;
+}
+

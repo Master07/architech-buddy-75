@@ -200,6 +200,8 @@ export type Database = {
           locked_at: string | null
           max_attempts: number
           mode: string
+          not_before: string | null
+          pipeline_state: Json
           prompt: string
           resubmitted_from: string | null
           source: string
@@ -223,6 +225,8 @@ export type Database = {
           locked_at?: string | null
           max_attempts?: number
           mode: string
+          not_before?: string | null
+          pipeline_state?: Json
           prompt: string
           resubmitted_from?: string | null
           source?: string
@@ -246,6 +250,8 @@ export type Database = {
           locked_at?: string | null
           max_attempts?: number
           mode?: string
+          not_before?: string | null
+          pipeline_state?: Json
           prompt?: string
           resubmitted_from?: string | null
           source?: string
@@ -522,6 +528,8 @@ export type Database = {
           locked_at: string | null
           max_attempts: number
           mode: string
+          not_before: string | null
+          pipeline_state: Json
           prompt: string
           resubmitted_from: string | null
           source: string
@@ -539,6 +547,41 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_design_steps: {
+        Args: { _limit?: number }
+        Returns: {
+          api_key_id: string | null
+          attempts: number
+          bypass_rls: boolean
+          created_at: string
+          current_stage: string | null
+          design_id: string
+          finished_at: string | null
+          id: string
+          last_error: string | null
+          locked_at: string | null
+          max_attempts: number
+          mode: string
+          not_before: string | null
+          pipeline_state: Json
+          prompt: string
+          resubmitted_from: string | null
+          source: string
+          stage_started_at: string | null
+          stages_done: number
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "design_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      kick_design_worker: { Args: never; Returns: undefined }
       match_document_chunks: {
         Args: { match_count?: number; query_embedding: string }
         Returns: {
@@ -564,6 +607,10 @@ export type Database = {
           section: string
           similarity: number
         }[]
+      }
+      pause_design_queue: {
+        Args: { _minutes: number; _reason: string }
+        Returns: undefined
       }
       verify_design_worker_token: { Args: { _token: string }; Returns: boolean }
     }

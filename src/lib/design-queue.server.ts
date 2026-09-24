@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { createDesignRecord, streamDesignInto, type DesignJobParams } from "./design-generate.server";
+import { createDesignRecord } from "./design-generate.server";
 import type { DesignMode } from "./design-agent";
 
 type Admin = SupabaseClient<Database>;
@@ -53,120 +53,196 @@ export async function enqueueDesignJob(params: EnqueueParams) {
     .single();
   if (error) throw new Error(error.message);
 
+  await kickDesignWorker();
   return { design, job };
 }
 
-/**
- * Claims one queued job (SKIP LOCKED, so concurrent workers never collide) and
- * runs it to completion. Returns false when the queue is empty.
- */
-export async function processNextDesignJob(): Promise<boolean> {
-  const db = await admin();
-  const { data, error } = await db.rpc("claim_design_job");
-  if (error) throw new Error(error.message);
-  const job = (data ?? [])[0];
-  if (!job) return false;
-
-  const abortController = new AbortController();
-  let cancelled = false;
-  let checkingCancellation = false;
-  let ticks = 0;
-  const cancellationCheck = setInterval(() => {
-    ticks += 1;
-    // Heartbeat: keep the lease fresh so the stale-lock sweep never reclaims a live job.
-    if (ticks % 20 === 0) {
-      void Promise.resolve(
-        db.from("design_jobs").update({ locked_at: new Date().toISOString() }).eq("id", job.id).eq("status", "running"),
-      ).then(() => undefined, () => undefined);
-    }
-    if (checkingCancellation) return;
-    checkingCancellation = true;
-    void Promise.resolve(
-      db.from("design_jobs").select("status").eq("id", job.id).maybeSingle(),
-    ).then(({ data: current }) => {
-      if (current?.status === "cancelled") {
-        cancelled = true;
-        abortController.abort("Cancelled by user");
-      }
-    }, () => undefined).finally(() => {
-        checkingCancellation = false;
-    });
-  }, 1000);
-
-  const params: DesignJobParams = {
-    supabase: db,
-    userId: job.user_id,
-    mode: job.mode as DesignMode,
-    prompt: job.prompt,
-    source: job.source as DesignJobParams["source"],
-    ownerScope: job.user_id,
-    abortSignal: abortController.signal,
-  };
-
+/** Asks the database to wake a worker over a long-lived connection. Never throws. */
+export async function kickDesignWorker() {
   try {
-    let stageCount = 0;
-    const { finished } = await streamDesignInto(params, job.design_id, {
-      onStage: (stage) => {
-        const now = new Date().toISOString();
-        const stagesDone = stageCount;
-        stageCount += 1;
-        void db
-          .from("design_jobs")
-          .update({ current_stage: stage, stages_done: stagesDone, stage_started_at: now, updated_at: now, locked_at: now })
-          .eq("id", job.id)
-          .eq("status", "running")
-          .then(() => undefined, () => undefined);
-      },
-    });
-    await finished;
+    const db = await admin();
+    const { error } = await db.rpc("kick_design_worker");
+    if (error) console.error("[design-queue] kick failed", error.message);
+  } catch (error) {
+    console.error("[design-queue] kick failed", error);
+  }
+}
+
+const HEARTBEAT_MS = 20_000;
+/** Far above a normal step (~1-2 min); only catches a hung provider call. */
+const STEP_DEADLINE_MS = 12 * 60_000;
+
+type ProviderFailure = { kind: "retry" | "rate" | "pause" | "fatal"; status?: number; message: string };
+
+function classify(error: unknown): ProviderFailure {
+  const e = error as { statusCode?: number; status?: number; lastError?: unknown; message?: string; responseBody?: string };
+  const inner = (e?.lastError ?? e) as typeof e;
+  const status = inner?.statusCode ?? inner?.status ?? e?.statusCode;
+  let message = String(inner?.message ?? e?.message ?? error).slice(0, 500);
+  if (inner?.responseBody) {
+    try {
+      const parsed = JSON.parse(inner.responseBody);
+      message = String(parsed?.error?.message ?? parsed?.message ?? message).slice(0, 500);
+    } catch { /* keep */ }
+  }
+  if (status === 429) return { kind: "rate", status, message };
+  if (status === 402 || status === 403) return { kind: "pause", status, message };
+  if (status === 400 || status === 401 || status === 404) return { kind: "fatal", status, message };
+  return { kind: "retry", ...(status ? { status } : {}), message };
+}
+
+type Job = Database["public"]["Tables"]["design_jobs"]["Row"];
+
+/** Runs one stage of one claimed job, saves it, and advances the job. */
+async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" | "stopped"> {
+  const { planNextStep, runSingleStage } = await import("./agent-run.server");
+  const state = (job.pipeline_state ?? {}) as Record<string, string>;
+  const mode = job.mode as DesignMode;
+  const plan = planNextStep(mode, job.prompt, state);
+  const stagesDone = Object.keys(state).length;
+
+  const finishDone = async (document: string, doneCount = stagesDone) => {
     const now = new Date().toISOString();
     const { data: done } = await db
       .from("design_jobs")
-      .update({ status: "succeeded", locked_at: null, finished_at: now, updated_at: now, current_stage: null, stages_done: stageCount })
-      .eq("id", job.id)
-      .eq("status", "running")
-      .select("id");
-    if (!done?.length) {
-      // Cancelled while running: discard the result.
-      await db
-        .from("designs")
-        .update({ status: "failed", error: "Cancelled by user" })
-        .eq("id", job.design_id);
-    }
-  } catch (error) {
-    if (cancelled || abortController.signal.aborted) {
-      await db
-        .from("designs")
-        .update({ status: "failed", error: "Cancelled by user" })
-        .eq("id", job.design_id);
-      return true;
-    }
-    const message = (error as Error).message.slice(0, 500);
-    const exhausted = job.attempts >= job.max_attempts;
+      .update({ status: "succeeded", locked_at: null, finished_at: now, updated_at: now, current_stage: null, stages_done: doneCount, last_error: null })
+      .eq("id", job.id).eq("status", "running").select("id");
+    if (!done?.length) return "stopped" as const;
+    const heading = document.match(/^#\s+(.+)$/m)?.[1]?.trim();
+    await db.from("designs").update({
+      status: "ready",
+      markdown: document,
+      diagram: document.match(/```mermaid\n([\s\S]*?)```/)?.[1]?.trim() ?? null,
+      title: (heading ?? job.prompt.trim().split("\n")[0] ?? "Untitled design").slice(0, 120),
+      error: null,
+      updated_at: now,
+    }).eq("id", job.design_id);
+    return "finished" as const;
+  };
+
+  if (plan.done) return finishDone(plan.document);
+
+  const abort = new AbortController();
+  let cancelled = false;
+  const deadline = setTimeout(() => abort.abort("Step deadline exceeded"), STEP_DEADLINE_MS);
+  let lastBeat = Date.now();
+  let inflight: Promise<unknown> = Promise.resolve();
+  let stopped = false;
+  const watcher = setInterval(() => {
+    if (stopped) return;
+    inflight = (async () => {
+      const { data } = await db.from("design_jobs").select("status").eq("id", job.id).maybeSingle();
+      if (stopped) return;
+      if (data?.status !== "running") {
+        cancelled = true;
+        abort.abort("Cancelled by user");
+        return;
+      }
+      if (Date.now() - lastBeat >= HEARTBEAT_MS) {
+        lastBeat = Date.now();
+        await db.from("design_jobs").update({ locked_at: new Date().toISOString() }).eq("id", job.id).eq("status", "running").not("locked_at", "is", null);
+      }
+    })().catch(() => undefined);
+  }, 3000);
+  // Lease writes must never land after the step's result is saved.
+  const stopWatcher = async () => {
+    stopped = true;
+    clearInterval(watcher);
+    await inflight;
+  };
+
+  {
     const now = new Date().toISOString();
-    const { data: updated } = await db
-      .from("design_jobs")
-      .update({
-        status: exhausted ? "failed" : "queued",
-        current_stage: null,
-        stages_done: 0,
-        last_error: message,
-        locked_at: null,
-        finished_at: exhausted ? now : null,
-        updated_at: now,
-      })
-      .eq("id", job.id)
-      .eq("status", "running")
-      .select("id");
-    if (!exhausted && updated?.length) {
-      // Leave the design row in `running` so a retry can still finish it.
-      await db.from("designs").update({ status: "running", error: message }).eq("id", job.design_id);
-    }
-    console.error("[design-queue]", job.id, message);
-  } finally {
-    clearInterval(cancellationCheck);
+    await db.from("design_jobs")
+      .update({ current_stage: plan.stage, stages_done: stagesDone, stage_started_at: now, updated_at: now, locked_at: now })
+      .eq("id", job.id).eq("status", "running");
   }
-  return true;
+
+  try {
+    const text = await runSingleStage(
+      {
+        supabase: db,
+        userId: job.user_id,
+        mode,
+        messages: [],
+        ownerScope: job.user_id,
+        usage: { requestId: job.design_id, kind: "design_job", designId: job.design_id, label: job.prompt },
+        abortSignal: abort.signal,
+      },
+      plan.stage,
+      plan.messages,
+    );
+    await stopWatcher();
+    if (cancelled) return "stopped";
+    const nextState = { ...state, [plan.key]: text };
+    const next = planNextStep(mode, job.prompt, nextState);
+    const now = new Date().toISOString();
+    const { data: saved } = await db
+      .from("design_jobs")
+      .update({ pipeline_state: nextState, stages_done: stagesDone + 1, attempts: 0, locked_at: null, last_error: null, updated_at: now })
+      .eq("id", job.id).eq("status", "running").select("id");
+    if (!saved?.length) return "stopped";
+    if (next.done) {
+      // Re-read nothing: finish immediately with the saved state.
+      return finishDone(next.document, stagesDone + 1);
+    }
+    return "advanced";
+  } catch (error) {
+    await stopWatcher();
+    if (cancelled) return "stopped";
+    const failure = abort.signal.aborted
+      ? { kind: "retry" as const, message: "The AI step took over 12 minutes and was retried" }
+      : classify(error);
+    const now = new Date();
+    const exhausted = failure.kind === "fatal" || failure.kind === "pause" || job.attempts >= job.max_attempts;
+    // Rate limits wait and retry without using up a try.
+    const update = failure.kind === "rate" && job.attempts < job.max_attempts + 3
+      ? { locked_at: null, attempts: Math.max(0, job.attempts - 1), not_before: new Date(now.getTime() + 60_000 * Math.max(1, job.attempts)).toISOString(), last_error: `Rate limited, retrying soon: ${failure.message}`, updated_at: now.toISOString() }
+      : exhausted
+        ? { status: "failed", locked_at: null, current_stage: null, finished_at: now.toISOString(), last_error: failure.message, updated_at: now.toISOString() }
+        : { locked_at: null, not_before: new Date(now.getTime() + 10_000 * job.attempts).toISOString(), last_error: failure.message, updated_at: now.toISOString() };
+    const { data: updated } = await db.from("design_jobs").update(update).eq("id", job.id).eq("status", "running").select("id, status");
+    if (updated?.[0]?.status === "failed") {
+      await db.from("designs").update({ status: "failed", error: failure.message }).eq("id", job.design_id);
+    }
+    if (failure.kind === "pause") {
+      await db.rpc("pause_design_queue", { _minutes: 15, _reason: failure.message });
+    }
+    console.error("[design-queue]", job.id, plan.stage, failure.status ?? "", failure.message);
+    return "stopped";
+  } finally {
+    clearTimeout(deadline);
+    stopped = true;
+    clearInterval(watcher);
+  }
+}
+
+/**
+ * Claims up to `limit` steps (the database enforces global and per-system caps),
+ * runs them side by side, and wakes a fresh worker if work remains. Each call does
+ * a bounded amount of work, so no request lives longer than one AI step.
+ */
+export async function runDesignSteps(limit = 4) {
+  const db = await admin();
+  const { data, error } = await db.rpc("claim_design_steps", { _limit: limit });
+  if (error) throw new Error(error.message);
+  const jobs = (data ?? []) as Job[];
+  if (jobs.length === 0) return { claimed: 0, results: [] as string[] };
+  const results = await Promise.all(jobs.map((job) => runJobStep(db, job).catch((e) => {
+    console.error("[design-queue] step crashed", job.id, e);
+    return "stopped" as const;
+  })));
+  // Gated next hop: only wake another worker while runnable work exists.
+  const { count } = await db
+    .from("design_jobs")
+    .select("id", { count: "exact", head: true })
+    .or("status.eq.queued,and(status.eq.running,locked_at.is.null)");
+  if ((count ?? 0) > 0) {
+    // One wake-up per finished step keeps parallelism without a storm.
+    const wakes = Math.min(count ?? 0, jobs.length);
+    await Promise.all(Array.from({ length: wakes }, () => kickDesignWorker()));
+  }
+  return { claimed: jobs.length, results };
 }
 
 export async function cancelDesignJob(input: { userId: string; jobId?: string; designId?: string }) {
@@ -198,13 +274,8 @@ export async function cancelDesignJob(input: { userId: string; jobId?: string; d
   return { jobId: data.id, designId: data.design_id, status: "cancelled" as const };
 }
 
-/** Drains up to `max` jobs sequentially; used by the worker route and the cron sweep. */
-export async function drainDesignQueue(max = 3) {
-  let processed = 0;
-  for (let i = 0; i < max; i += 1) {
-    const didWork = await processNextDesignJob();
-    if (!didWork) break;
-    processed += 1;
-  }
-  return processed;
+/** Kept for older callers: runs one bounded batch of steps. */
+export async function drainDesignQueue(max = 4) {
+  const { claimed } = await runDesignSteps(max);
+  return claimed;
 }
