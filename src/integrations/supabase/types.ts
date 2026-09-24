@@ -565,6 +565,7 @@ export type Database = {
           similarity: number
         }[]
       }
+      verify_design_worker_token: { Args: { _token: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
