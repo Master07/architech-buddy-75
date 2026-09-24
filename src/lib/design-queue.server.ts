@@ -112,7 +112,7 @@ export async function processNextDesignJob(): Promise<boolean> {
         stageCount += 1;
         void db
           .from("design_jobs")
-          .update({ current_stage: stage, stages_done: stagesDone, stage_started_at: now, updated_at: now })
+          .update({ current_stage: stage, stages_done: stagesDone, stage_started_at: now, updated_at: now, locked_at: now })
           .eq("id", job.id)
           .eq("status", "running")
           .then(() => undefined, () => undefined);
