@@ -70,7 +70,15 @@ export async function processNextDesignJob(): Promise<boolean> {
   const abortController = new AbortController();
   let cancelled = false;
   let checkingCancellation = false;
+  let ticks = 0;
   const cancellationCheck = setInterval(() => {
+    ticks += 1;
+    // Heartbeat: keep the lease fresh so the stale-lock sweep never reclaims a live job.
+    if (ticks % 20 === 0) {
+      void Promise.resolve(
+        db.from("design_jobs").update({ locked_at: new Date().toISOString() }).eq("id", job.id).eq("status", "running"),
+      ).then(() => undefined, () => undefined);
+    }
     if (checkingCancellation) return;
     checkingCancellation = true;
     void Promise.resolve(
