@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { createDesignRecord, streamDesignInto, type DesignJobParams } from "./design-generate.server";
+import { createDesignRecord } from "./design-generate.server";
 import type { DesignMode } from "./design-agent";
 
 type Admin = SupabaseClient<Database>;
@@ -170,7 +170,7 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
     if (!saved?.length) return "stopped";
     if (next.done) {
       // Re-read nothing: finish immediately with the saved state.
-      return finishDone(next.document).then((r) => (r === "finished" ? "finished" : "stopped"));
+      return finishDone(next.document);
     }
     return "advanced";
   } catch (error) {
@@ -258,13 +258,8 @@ export async function cancelDesignJob(input: { userId: string; jobId?: string; d
   return { jobId: data.id, designId: data.design_id, status: "cancelled" as const };
 }
 
-/** Drains up to `max` jobs sequentially; used by the worker route and the cron sweep. */
-export async function drainDesignQueue(max = 3) {
-  let processed = 0;
-  for (let i = 0; i < max; i += 1) {
-    const didWork = await processNextDesignJob();
-    if (!didWork) break;
-    processed += 1;
-  }
-  return processed;
+/** Kept for older callers: runs one bounded batch of steps. */
+export async function drainDesignQueue(max = 4) {
+  const { claimed } = await runDesignSteps(max);
+  return claimed;
 }
