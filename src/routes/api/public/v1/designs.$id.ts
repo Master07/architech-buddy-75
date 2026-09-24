@@ -4,7 +4,7 @@ import { authenticateRequest, AuthError } from "@/lib/supabase-request.server";
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, DELETE, OPTIONS",
 };
 
 export const Route = createFileRoute("/api/public/v1/designs/$id")({
@@ -53,6 +53,18 @@ export const Route = createFileRoute("/api/public/v1/designs/$id")({
         } catch (error) {
           const status = error instanceof AuthError ? error.status : 500;
           return Response.json({ error: (error as Error).message }, { status, headers: CORS });
+        }
+      },
+      DELETE: async ({ request, params }) => {
+        try {
+          const auth = await authenticateRequest(request);
+          const { cancelDesignJob } = await import("@/lib/design-queue.server");
+          const result = await cancelDesignJob({ userId: auth.userId, designId: params.id });
+          return Response.json(result, { headers: CORS });
+        } catch (error) {
+          const message = (error as Error).message;
+          const status = error instanceof AuthError ? error.status : message === "Request is no longer active" ? 409 : 500;
+          return Response.json({ error: message }, { status, headers: CORS });
         }
       },
     },

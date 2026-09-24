@@ -41,6 +41,8 @@ export type AgentRunOptions = {
   evidence?: EvidenceItem[];
   /** When set, token usage of every stage is logged under this request. */
   usage?: UsageTag;
+  /** Stops the current provider request when a queued job is cancelled. */
+  abortSignal?: AbortSignal;
 };
 
 export async function hasLibrary(supabase: SupabaseClient<Database>, userId: string) {
@@ -121,6 +123,7 @@ export async function runDesignAgent(options: AgentRunOptions) {
     messages,
     tools: buildTools(options, libraryReady, evidence),
     stopWhen: stepCountIs(50),
+    ...(options.abortSignal ? { abortSignal: options.abortSignal } : {}),
   });
 
   return { result, gateway };
@@ -222,6 +225,7 @@ export async function runDesignPipeline(
       messages,
       tools,
       stopWhen: stepCountIs(50),
+      ...(options.abortSignal ? { abortSignal: options.abortSignal } : {}),
     });
     handlers.onStage?.({ stage, result });
     const text = await result.text;
