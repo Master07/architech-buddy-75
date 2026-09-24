@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
-import { drainDesignQueue } from "@/lib/design-queue.server";
+import { runDesignSteps } from "@/lib/design-queue.server";
 
 async function authenticateDesignWorker(request: Request): Promise<Response | null> {
   const authorization = request.headers.get("authorization") ?? "";
@@ -27,13 +27,25 @@ export const Route = createFileRoute("/api/public/v1/jobs/design")({
       POST: async ({ request }) => {
         const unauthorized = await authenticateDesignWorker(request);
         if (unauthorized) return unauthorized;
-        try {
-          const processed = await drainDesignQueue(3);
-          return Response.json({ processed });
-        } catch (error) {
-          console.error("[jobs/design]", error);
-          return Response.json({ error: (error as Error).message }, { status: 500 });
-        }
+        // The step runs inside this request; keep-alive bytes hold the connection
+        // open so nothing idles out while one AI step (1-3 minutes) completes.
+        const encoder = new TextEncoder();
+        const body = new ReadableStream<Uint8Array>({
+          async start(controller) {
+            const ping = setInterval(() => controller.enqueue(encoder.encode(" ")), 15_000);
+            try {
+              const result = await runDesignSteps(4);
+              controller.enqueue(encoder.encode(JSON.stringify(result)));
+            } catch (error) {
+              console.error("[jobs/design]", error);
+              controller.enqueue(encoder.encode(JSON.stringify({ error: (error as Error).message })));
+            } finally {
+              clearInterval(ping);
+              controller.close();
+            }
+          },
+        });
+        return new Response(body, { headers: { "Content-Type": "application/json" } });
       },
     },
   },

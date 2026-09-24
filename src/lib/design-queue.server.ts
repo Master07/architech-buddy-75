@@ -53,6 +53,7 @@ export async function enqueueDesignJob(params: EnqueueParams) {
     .single();
   if (error) throw new Error(error.message);
 
+  await kickDesignWorker();
   return { design, job };
 }
 

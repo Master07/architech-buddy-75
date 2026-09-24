@@ -25,16 +25,17 @@ export const Route = createFileRoute("/api/public/v1/designs/$id")({
 
           const { data: job } = await auth.supabase
             .from("design_jobs")
-            .select("id, status, attempts, max_attempts, last_error, mode, started_at, current_stage, stages_done")
+            .select("id, status, attempts, max_attempts, last_error, mode, started_at, current_stage, stages_done, locked_at, updated_at")
             .eq("design_id", params.id)
             .eq("user_id", auth.userId)
             .maybeSingle();
 
-          // Self-heal: a queued job (or one whose worker died) gets picked up on poll.
-          if (job && (job.status === "queued" || job.status === "running")) {
-            const { drainDesignQueue } = await import("@/lib/design-queue.server");
-            const { runInBackground } = await import("@/lib/background.server");
-            runInBackground(drainDesignQueue(1));
+          // Self-heal: if a waiting step has sat idle for 30s, wake a worker.
+          const idle = job && (job.status === "queued" || (job.status === "running" && !job.locked_at))
+            && Date.now() - new Date(job.updated_at).getTime() > 30_000;
+          if (idle) {
+            const { kickDesignWorker } = await import("@/lib/design-queue.server");
+            await kickDesignWorker();
           }
 
           let progress = null;

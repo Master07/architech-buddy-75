@@ -2,8 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { authenticateRequest, AuthError } from "@/lib/supabase-request.server";
 import { createDesignRecord, streamDesignInto, type DesignJobParams } from "@/lib/design-generate.server";
-import { drainDesignQueue, enqueueDesignJob } from "@/lib/design-queue.server";
-import { runInBackground } from "@/lib/background.server";
+import { enqueueDesignJob } from "@/lib/design-queue.server";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -29,7 +28,9 @@ export const Route = createFileRoute("/api/public/v1/design")({
       POST: async ({ request }) => {
         try {
           const auth = await authenticateRequest(request);
-          const parsed = Body.safeParse(await request.json());
+          const raw = await request.json().catch(() => undefined);
+          if (raw === undefined) return Response.json({ error: "Body must be valid JSON" }, { status: 400, headers: CORS });
+          const parsed = Body.safeParse(raw);
           if (!parsed.success) {
             return Response.json(
               { error: "Invalid request body", details: parsed.error.flatten() },
@@ -89,9 +90,7 @@ export const Route = createFileRoute("/api/public/v1/design")({
             ...base,
             ...(auth.apiKeyId ? { apiKeyId: auth.apiKeyId } : {}),
           });
-          // Wake the worker in-process: also re-claims any job a previous worker left
-          // stalled, which is why no scheduled sweep is needed.
-          runInBackground(drainDesignQueue(3));
+          // enqueueDesignJob already woke a worker over a long-lived connection.
           return Response.json(
             {
               design,
