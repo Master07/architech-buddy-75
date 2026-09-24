@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RotateCcw, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { listApiLogs, cancelApiJob, resubmitApiJob } from "@/lib/api-logs.functions";
+import { listApiLogs, listAppAiActivity, cancelApiJob, resubmitApiJob } from "@/lib/api-logs.functions";
 
 export const Route = createFileRoute("/_authenticated/app/logs")({
   head: () => ({
@@ -23,6 +23,22 @@ function fmt(ms: number) {
   return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 }
 
+function tok(n: number) {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+}
+
+function Tokens({ t }: { t: { input: number; output: number; total: number } | null }) {
+  if (!t) return <>—</>;
+  return (
+    <span title={`${t.input.toLocaleString()} in · ${t.output.toLocaleString()} out`}>
+      {tok(t.total)}
+      <span className="label-mono block text-muted-foreground">
+        {tok(t.input)} in · {tok(t.output)} out
+      </span>
+    </span>
+  );
+}
+
 function LogsPage() {
   const list = useServerFn(listApiLogs);
   const cancel = useServerFn(cancelApiJob);
@@ -30,6 +46,8 @@ function LogsPage() {
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState<string | null>(null);
 
+  const listActivity = useServerFn(listAppAiActivity);
+  const activity = useQuery({ queryKey: ["ai-activity"], queryFn: () => listActivity(), refetchInterval: 5000 });
   const logs = useQuery({ queryKey: ["api-logs"], queryFn: () => list(), refetchInterval: 5000 });
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -66,6 +84,7 @@ function LogsPage() {
                 <th className="p-2">Status</th>
                 <th className="p-2">Waited</th>
                 <th className="p-2">Ran for</th>
+                <th className="p-2">Tokens</th>
                 <th className="p-2" />
               </tr>
             </thead>
@@ -98,6 +117,7 @@ function LogsPage() {
                     </td>
                     <td className="whitespace-nowrap p-2">{waited == null ? "—" : fmt(Math.max(0, waited))}</td>
                     <td className="whitespace-nowrap p-2">{ran == null ? "—" : fmt(Math.max(0, ran))}</td>
+                    <td className="whitespace-nowrap p-2"><Tokens t={j.tokens} /></td>
                     <td className="whitespace-nowrap p-2 text-right">
                       {active ? (
                         <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => act(j.id, "cancel")}>
@@ -113,7 +133,44 @@ function LogsPage() {
                 );
               })}
               {logs.data?.length === 0 && (
-                <tr><td colSpan={6} className="p-4 text-muted-foreground">No requests yet.</td></tr>
+                <tr><td colSpan={7} className="p-4 text-muted-foreground">No requests yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 className="font-display mt-10 text-lg font-semibold">In-app AI activity</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Chat turns and document reviews made inside the app.
+        </p>
+        <div className="mt-4 overflow-x-auto border border-border">
+          <table className="w-full text-sm">
+            <thead className="label-mono bg-secondary text-left text-muted-foreground">
+              <tr>
+                <th className="p-2">When</th>
+                <th className="p-2">Request</th>
+                <th className="p-2">Steps</th>
+                <th className="p-2">AI time</th>
+                <th className="p-2">Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(activity.data ?? []).map((a) => (
+                <tr key={a.requestId} className="border-t border-border align-top">
+                  <td className="whitespace-nowrap p-2">{new Date(a.firstAt).toLocaleString()}</td>
+                  <td className="max-w-xs p-2">
+                    <p className="line-clamp-2">{a.label ?? "—"}</p>
+                    <p className="label-mono mt-1 text-muted-foreground">
+                      {a.kind}{a.model ? ` · ${a.model}` : ""}
+                    </p>
+                  </td>
+                  <td className="p-2">{a.steps}</td>
+                  <td className="whitespace-nowrap p-2">{fmt(a.durationMs)}</td>
+                  <td className="whitespace-nowrap p-2"><Tokens t={a} /></td>
+                </tr>
+              ))}
+              {activity.data?.length === 0 && (
+                <tr><td colSpan={5} className="p-4 text-muted-foreground">No in-app AI activity logged yet.</td></tr>
               )}
             </tbody>
           </table>
