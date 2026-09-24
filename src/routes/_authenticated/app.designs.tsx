@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listDesigns, getDesign, deleteDesign } from "@/lib/designs.functions";
+import { DesignSteps } from "@/components/design-steps";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -92,6 +93,7 @@ function DesignsPage() {
                 </Button>
               </div>
             </div>
+            <DesignSteps designId={selected} />
             <MessageResponse>{detail.data.markdown ?? ""}</MessageResponse>
           </div>
         )}
