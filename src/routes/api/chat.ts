@@ -67,6 +67,18 @@ export const Route = createFileRoute("/api/chat")({
                   ...(threadId ? { threadId } : {}),
                   ...(body.evidence?.length ? { evidence: body.evidence } : {}),
                   ...(auth.via === "api_key" ? { ownerScope: auth.userId } : {}),
+                  usage: {
+                    requestId: crypto.randomUUID(),
+                    kind: "chat",
+                    ...(threadId ? { threadId } : {}),
+                    label: (() => {
+                      const last = body.messages[body.messages.length - 1];
+                      const part = last?.parts?.find((p) => p.type === "text") as
+                        | { text: string }
+                        | undefined;
+                      return part?.text ?? `${mode} turn`;
+                    })(),
+                  },
                 },
                 {
                   onStage: ({ stage, result }) => {

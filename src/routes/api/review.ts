@@ -3,6 +3,7 @@ import { stepCountIs, streamText } from "ai";
 import { authenticateRequest, AuthError } from "@/lib/supabase-request.server";
 import { resolveChatProvider } from "@/lib/ai-provider.server";
 import { DOCUMENT_REVIEW_PROMPT, systemPrompt } from "@/lib/design-agent";
+import { recordUsage } from "@/lib/usage.server";
 
 /**
  * Scores an uploaded design document against the blueprint's acceptance gates.
@@ -28,7 +29,15 @@ export const Route = createFileRoute("/api/review")({
         }
 
         const resolved = await resolveChatProvider(auth.supabase, auth.userId);
+        const startedAt = Date.now();
+        const userId = auth.userId;
         const result = streamText({
+          onFinish: ({ totalUsage }) =>
+            recordUsage(
+              userId,
+              { requestId: crypto.randomUUID(), kind: "review", label: body.title?.trim() || "Document review" },
+              { stage: "review", model: resolved.modelId, usage: totalUsage, durationMs: Date.now() - startedAt },
+            ),
           model: resolved.model,
           system: systemPrompt("review", { hasLibrary: false, hasEvidence: false }),
           messages: [

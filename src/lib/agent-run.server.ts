@@ -25,6 +25,7 @@ import {
 } from "./design-agent";
 import { searchKnowledge } from "./retrieval.server";
 import { formatEvidenceBundle, loadThreadEvidence, type EvidenceItem } from "./evidence.server";
+import { recordUsage, type UsageTag } from "./usage.server";
 
 export type AgentRunOptions = {
   supabase: SupabaseClient<Database>;
@@ -38,6 +39,8 @@ export type AgentRunOptions = {
   threadId?: string;
   /** Evidence supplied inline by an API caller with no session. */
   evidence?: EvidenceItem[];
+  /** When set, token usage of every stage is logged under this request. */
+  usage?: UsageTag;
 };
 
 export async function hasLibrary(supabase: SupabaseClient<Database>, userId: string) {
@@ -212,6 +215,7 @@ export async function runDesignPipeline(
   const stages: Partial<Record<PipelineStage, string>> = {};
 
   const runStage = async (stage: PipelineStage, messages: ModelMessage[]) => {
+    const startedAt = Date.now();
     const result = streamText({
       model: resolved.model,
       system,
@@ -221,6 +225,15 @@ export async function runDesignPipeline(
     });
     handlers.onStage?.({ stage, result });
     const text = await result.text;
+    if (options.usage) {
+      const usage = await Promise.resolve(result.totalUsage).catch(() => undefined);
+      await recordUsage(options.userId, options.usage, {
+        stage,
+        model: resolved.modelId,
+        ...(usage ? { usage } : {}),
+        durationMs: Date.now() - startedAt,
+      });
+    }
     stages[stage] = text;
     handlers.onStageEnd?.(stage, text);
     return text;

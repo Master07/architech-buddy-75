@@ -14,7 +14,56 @@ export const listApiLogs = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) throw new Error(error.message);
-    return data ?? [];
+    const jobs = data ?? [];
+    const ids = jobs.map((j) => j.design_id);
+    const totals = new Map<string, { input: number; output: number; total: number }>();
+    if (ids.length) {
+      const { data: usage } = await context.supabase
+        .from("ai_usage")
+        .select("design_id, input_tokens, output_tokens, total_tokens")
+        .in("design_id", ids);
+      for (const u of usage ?? []) {
+        if (!u.design_id) continue;
+        const t = totals.get(u.design_id) ?? { input: 0, output: 0, total: 0 };
+        t.input += u.input_tokens;
+        t.output += u.output_tokens;
+        t.total += u.total_tokens;
+        totals.set(u.design_id, t);
+      }
+    }
+    return jobs.map((j) => ({ ...j, tokens: totals.get(j.design_id) ?? null }));
+  });
+
+/** Chat turns and document reviews made inside the app, grouped per request. */
+export const listAppAiActivity = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("ai_usage")
+      .select("request_id, kind, label, stage, model, input_tokens, output_tokens, total_tokens, duration_ms, created_at")
+      .eq("user_id", context.userId)
+      .is("design_id", null)
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    const groups = new Map<
+      string,
+      { requestId: string; kind: string; label: string | null; model: string | null; firstAt: string; steps: number; input: number; output: number; total: number; durationMs: number }
+    >();
+    for (const u of data ?? []) {
+      const g = groups.get(u.request_id) ?? {
+        requestId: u.request_id, kind: u.kind, label: u.label, model: u.model,
+        firstAt: u.created_at, steps: 0, input: 0, output: 0, total: 0, durationMs: 0,
+      };
+      g.steps += 1;
+      g.input += u.input_tokens;
+      g.output += u.output_tokens;
+      g.total += u.total_tokens;
+      g.durationMs += u.duration_ms ?? 0;
+      if (u.created_at < g.firstAt) g.firstAt = u.created_at;
+      groups.set(u.request_id, g);
+    }
+    return [...groups.values()].slice(0, 100);
   });
 
 async function ownedJob(supabase: { from: Function } & any, userId: string, id: string) {
