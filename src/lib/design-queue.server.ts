@@ -65,6 +65,29 @@ export async function processNextDesignJob(): Promise<boolean> {
   const job = (data ?? [])[0];
   if (!job) return false;
 
+  const abortController = new AbortController();
+  let cancelled = false;
+  let checkingCancellation = false;
+  const cancellationCheck = setInterval(() => {
+    if (checkingCancellation) return;
+    checkingCancellation = true;
+    void db
+      .from("design_jobs")
+      .select("status")
+      .eq("id", job.id)
+      .maybeSingle()
+      .then(({ data: current }) => {
+        if (current?.status === "cancelled") {
+          cancelled = true;
+          abortController.abort("Cancelled by user");
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        checkingCancellation = false;
+      });
+  }, 1000);
+
   const params: DesignJobParams = {
     supabase: db,
     userId: job.user_id,
@@ -72,6 +95,7 @@ export async function processNextDesignJob(): Promise<boolean> {
     prompt: job.prompt,
     source: job.source as DesignJobParams["source"],
     ownerScope: job.user_id,
+    abortSignal: abortController.signal,
   };
 
   try {
@@ -105,6 +129,13 @@ export async function processNextDesignJob(): Promise<boolean> {
         .eq("id", job.design_id);
     }
   } catch (error) {
+    if (cancelled || abortController.signal.aborted) {
+      await db
+        .from("designs")
+        .update({ status: "failed", error: "Cancelled by user" })
+        .eq("id", job.design_id);
+      return true;
+    }
     const message = (error as Error).message.slice(0, 500);
     const exhausted = job.attempts >= job.max_attempts;
     const now = new Date().toISOString();
@@ -127,8 +158,39 @@ export async function processNextDesignJob(): Promise<boolean> {
       await db.from("designs").update({ status: "running", error: message }).eq("id", job.design_id);
     }
     console.error("[design-queue]", job.id, message);
+  } finally {
+    clearInterval(cancellationCheck);
   }
   return true;
+}
+
+export async function cancelDesignJob(input: { userId: string; jobId?: string; designId?: string }) {
+  const db = await admin();
+  let query = db
+    .from("design_jobs")
+    .update({
+      status: "cancelled",
+      last_error: "Cancelled by user",
+      locked_at: null,
+      finished_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      current_stage: null,
+    })
+    .eq("user_id", input.userId)
+    .in("status", ["queued", "running"]);
+  if (input.jobId) query = query.eq("id", input.jobId);
+  if (input.designId) query = query.eq("design_id", input.designId);
+  const { data, error } = await query.select("id, design_id").maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Request is no longer active");
+
+  const { error: designError } = await db
+    .from("designs")
+    .update({ status: "failed", error: "Cancelled by user", updated_at: new Date().toISOString() })
+    .eq("id", data.design_id)
+    .eq("user_id", input.userId);
+  if (designError) throw new Error(designError.message);
+  return { jobId: data.id, designId: data.design_id, status: "cancelled" as const };
 }
 
 /** Drains up to `max` jobs sequentially; used by the worker route and the cron sweep. */

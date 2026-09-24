@@ -22,6 +22,7 @@ export type DesignJobParams = {
   source: "api" | "mcp" | "app";
   threadId?: string;
   ownerScope?: string;
+  abortSignal?: AbortSignal;
 };
 
 const DESIGN_COLUMNS = "id, title, mode, status, source, markdown, diagram, error, created_at";
@@ -103,6 +104,7 @@ export async function streamDesignInto(
         label: params.prompt,
         ...(params.threadId ? { threadId: params.threadId } : {}),
       },
+      ...(params.abortSignal ? { abortSignal: params.abortSignal } : {}),
     },
     {
       onStage: ({ stage, result }) => {

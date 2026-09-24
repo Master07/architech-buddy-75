@@ -108,17 +108,8 @@ export const cancelApiJob = createServerFn({ method: "POST" })
     if (job.status !== "queued" && job.status !== "running") {
       throw new Error("Only waiting or running requests can be cancelled");
     }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const now = new Date().toISOString();
-    await supabaseAdmin
-      .from("design_jobs")
-      .update({ status: "cancelled", last_error: "Cancelled by user", locked_at: null, finished_at: now, updated_at: now })
-      .eq("id", job.id)
-      .in("status", ["queued", "running"]);
-    await supabaseAdmin
-      .from("designs")
-      .update({ status: "failed", error: "Cancelled by user" })
-      .eq("id", job.design_id);
+    const { cancelDesignJob } = await import("./design-queue.server");
+    await cancelDesignJob({ userId: context.userId, jobId: job.id });
     return { ok: true };
   });
 
@@ -127,6 +118,9 @@ export const resubmitApiJob = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const job = await ownedJob(context.supabase, context.userId, data.id);
+    if (job.status === "queued" || job.status === "running") {
+      throw new Error("Cancel this active request before resubmitting it");
+    }
     const { enqueueDesignJob, drainDesignQueue } = await import("./design-queue.server");
     const { runInBackground } = await import("./background.server");
     const { design, job: created } = await enqueueDesignJob({

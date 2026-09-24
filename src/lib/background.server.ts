@@ -1,3 +1,9 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+
+type ExecutionContext = { waitUntil?: (promise: Promise<unknown>) => void };
+
+const executionContext = new AsyncLocalStorage<ExecutionContext>();
+
 /**
  * Keeps a promise alive after the HTTP response has been returned.
  *
@@ -12,7 +18,7 @@ export function runInBackground(work: Promise<unknown>) {
   });
 
   try {
-    const ctx = (globalThis as { __cfCtx?: { waitUntil?: (p: Promise<unknown>) => void } }).__cfCtx;
+    const ctx = executionContext.getStore();
     if (ctx?.waitUntil) {
       ctx.waitUntil(safe);
       return;
@@ -24,9 +30,10 @@ export function runInBackground(work: Promise<unknown>) {
   void safe;
 }
 
-/** Best-effort capture of the Cloudflare execution context for `runInBackground`. */
-export function rememberExecutionContext(ctx: unknown) {
-  if (ctx && typeof (ctx as { waitUntil?: unknown }).waitUntil === "function") {
-    (globalThis as { __cfCtx?: unknown }).__cfCtx = ctx;
-  }
+/** Keeps each request's execution context isolated from concurrent requests. */
+export function withExecutionContext<T>(ctx: unknown, work: () => T): T {
+  const scoped = ctx && typeof (ctx as ExecutionContext).waitUntil === "function"
+    ? (ctx as ExecutionContext)
+    : {};
+  return executionContext.run(scoped, work);
 }
