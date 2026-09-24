@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/v1/designs/$id")({
 
           const { data: job } = await auth.supabase
             .from("design_jobs")
-            .select("id, status, attempts, max_attempts, last_error")
+            .select("id, status, attempts, max_attempts, last_error, mode, started_at, current_stage, stages_done")
             .eq("design_id", params.id)
             .eq("user_id", auth.userId)
             .maybeSingle();
@@ -37,7 +37,18 @@ export const Route = createFileRoute("/api/public/v1/designs/$id")({
             runInBackground(drainDesignQueue(1));
           }
 
-          return Response.json({ design: data, job: job ?? null }, { headers: CORS });
+          let progress = null;
+          if (job) {
+            const { estimateProgress } = await import("@/lib/job-progress");
+            const p = estimateProgress(job, null);
+            progress = {
+              percent: p.percent,
+              stage: job.current_stage,
+              stages_done: job.stages_done,
+              estimated_seconds_remaining: p.remainingMs == null ? null : Math.round(p.remainingMs / 1000),
+            };
+          }
+          return Response.json({ design: data, job: job ?? null, progress }, { headers: CORS });
 
         } catch (error) {
           const status = error instanceof AuthError ? error.status : 500;

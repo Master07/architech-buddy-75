@@ -8,7 +8,7 @@ export const listApiLogs = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("design_jobs")
       .select(
-        "id, design_id, mode, prompt, source, status, attempts, max_attempts, last_error, created_at, started_at, finished_at, resubmitted_from",
+        "id, design_id, mode, prompt, source, status, attempts, max_attempts, last_error, created_at, started_at, finished_at, resubmitted_from, current_stage, stages_done",
       )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
@@ -31,7 +31,29 @@ export const listApiLogs = createServerFn({ method: "GET" })
         totals.set(u.design_id, t);
       }
     }
-    return jobs.map((j) => ({ ...j, tokens: totals.get(j.design_id) ?? null }));
+    const { data: past } = await context.supabase
+      .from("design_jobs")
+      .select("mode, started_at, finished_at")
+      .eq("user_id", context.userId)
+      .eq("status", "succeeded")
+      .not("started_at", "is", null)
+      .not("finished_at", "is", null)
+      .order("finished_at", { ascending: false })
+      .limit(50);
+    const sums: Record<string, { ms: number; n: number }> = {};
+    for (const p of past ?? []) {
+      const ms = new Date(p.finished_at!).getTime() - new Date(p.started_at!).getTime();
+      if (ms <= 0) continue;
+      const s = (sums[p.mode] ??= { ms: 0, n: 0 });
+      s.ms += ms;
+      s.n += 1;
+    }
+    const avgRunMs: Record<string, number> = {};
+    for (const [mode, s] of Object.entries(sums)) avgRunMs[mode] = Math.round(s.ms / s.n);
+    return {
+      avgRunMs,
+      jobs: jobs.map((j) => ({ ...j, tokens: totals.get(j.design_id) ?? null })),
+    };
   });
 
 /** Chat turns and document reviews made inside the app, grouped per request. */

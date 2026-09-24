@@ -75,7 +75,11 @@ async function markFailed(params: DesignJobParams, designId: string, error: unkn
  * persists the final document. Callers that pipe the stream to the client keep
  * bytes flowing, which is what prevents platform request timeouts.
  */
-export async function streamDesignInto(params: DesignJobParams, designId: string) {
+export async function streamDesignInto(
+  params: DesignJobParams,
+  designId: string,
+  hooks: { onStage?: (stage: string) => void } = {},
+) {
   const chunks: Array<string | null> = [];
   let notify: (() => void) | null = null;
   const push = (value: string | null) => {
@@ -103,6 +107,7 @@ export async function streamDesignInto(params: DesignJobParams, designId: string
     {
       onStage: ({ stage, result }) => {
         push(`\n\n<!-- stage:${stage} -->\n\n`);
+        hooks.onStage?.(stage);
         void (async () => {
           for await (const delta of result.textStream) push(delta);
         })().catch(() => {});

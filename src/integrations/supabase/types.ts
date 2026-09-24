@@ -191,6 +191,7 @@ export type Database = {
           attempts: number
           bypass_rls: boolean
           created_at: string
+          current_stage: string | null
           design_id: string
           finished_at: string | null
           id: string
@@ -201,6 +202,8 @@ export type Database = {
           prompt: string
           resubmitted_from: string | null
           source: string
+          stage_started_at: string | null
+          stages_done: number
           started_at: string | null
           status: string
           updated_at: string
@@ -210,6 +213,7 @@ export type Database = {
           attempts?: number
           bypass_rls?: boolean
           created_at?: string
+          current_stage?: string | null
           design_id: string
           finished_at?: string | null
           id?: string
@@ -220,6 +224,8 @@ export type Database = {
           prompt: string
           resubmitted_from?: string | null
           source?: string
+          stage_started_at?: string | null
+          stages_done?: number
           started_at?: string | null
           status?: string
           updated_at?: string
@@ -229,6 +235,7 @@ export type Database = {
           attempts?: number
           bypass_rls?: boolean
           created_at?: string
+          current_stage?: string | null
           design_id?: string
           finished_at?: string | null
           id?: string
@@ -239,6 +246,8 @@ export type Database = {
           prompt?: string
           resubmitted_from?: string | null
           source?: string
+          stage_started_at?: string | null
+          stages_done?: number
           started_at?: string | null
           status?: string
           updated_at?: string
@@ -494,6 +503,7 @@ export type Database = {
           attempts: number
           bypass_rls: boolean
           created_at: string
+          current_stage: string | null
           design_id: string
           finished_at: string | null
           id: string
@@ -504,6 +514,8 @@ export type Database = {
           prompt: string
           resubmitted_from: string | null
           source: string
+          stage_started_at: string | null
+          stages_done: number
           started_at: string | null
           status: string
           updated_at: string
