@@ -52,3 +52,12 @@ export const STAGE_NAMES: Record<string, string> = {
   repair: "Gate repair",
   "interview-score": "Question scoring",
 };
+
+/** The planned step order for each mode (a gate repair may be added at the end). */
+export function plannedStages(mode: string): string[] {
+  if (mode === "design" || mode === "stack")
+    return ["requirements", "capacity", "candidates", "draft", "critique", "validation", "final", "gatecheck"];
+  if (mode === "review") return ["draft", "critique", "validation", "final", "gatecheck"];
+  if (mode === "interview") return ["draft", "interview-score"];
+  return ["requirements", "capacity", "candidates", "draft", "critique", "validation", "final", "gatecheck"];
+}

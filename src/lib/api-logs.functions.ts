@@ -8,7 +8,7 @@ export const listApiLogs = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("design_jobs")
       .select(
-        "id, design_id, mode, prompt, source, status, attempts, max_attempts, last_error, created_at, started_at, finished_at, resubmitted_from, current_stage, stages_done",
+        "id, design_id, mode, prompt, source, status, attempts, max_attempts, last_error, created_at, started_at, finished_at, resubmitted_from, current_stage, stages_done, api_key_id",
       )
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false })
@@ -50,9 +50,49 @@ export const listApiLogs = createServerFn({ method: "GET" })
     }
     const avgRunMs: Record<string, number> = {};
     for (const [mode, s] of Object.entries(sums)) avgRunMs[mode] = Math.round(s.ms / s.n);
+    // Per-system breakdown: each API key stands for one calling system.
+    const { data: keys } = await context.supabase
+      .from("api_keys")
+      .select("id, name, prefix, revoked")
+      .eq("user_id", context.userId);
+    const { data: allJobs } = await context.supabase
+      .from("design_jobs")
+      .select("design_id, api_key_id, source, status")
+      .eq("user_id", context.userId)
+      .limit(5000);
+    const allIds = (allJobs ?? []).map((j) => j.design_id);
+    const allTotals = new Map<string, number>();
+    for (let i = 0; i < allIds.length; i += 200) {
+      const { data: u } = await context.supabase
+        .from("ai_usage")
+        .select("design_id, total_tokens")
+        .in("design_id", allIds.slice(i, i + 200));
+      for (const r of u ?? []) {
+        if (r.design_id) allTotals.set(r.design_id, (allTotals.get(r.design_id) ?? 0) + r.total_tokens);
+      }
+    }
+    const keyName = new Map((keys ?? []).map((k) => [k.id, `${k.name} (${k.prefix}…)${k.revoked ? " · revoked" : ""}`]));
+    const systems = new Map<string, { key: string; name: string; requests: number; succeeded: number; failed: number; tokens: number }>();
+    for (const j of allJobs ?? []) {
+      const key = j.api_key_id ?? (j.source === "api" ? "untracked" : "app");
+      const name = j.api_key_id
+        ? keyName.get(j.api_key_id) ?? "Deleted key"
+        : j.source === "api" ? "API (key not recorded — older requests)" : "This app";
+      const s = systems.get(key) ?? { key, name, requests: 0, succeeded: 0, failed: 0, tokens: 0 };
+      s.requests += 1;
+      if (j.status === "succeeded") s.succeeded += 1;
+      if (j.status === "failed") s.failed += 1;
+      s.tokens += allTotals.get(j.design_id) ?? 0;
+      systems.set(key, s);
+    }
     return {
       avgRunMs,
-      jobs: jobs.map((j) => ({ ...j, tokens: totals.get(j.design_id) ?? null })),
+      systems: [...systems.values()].sort((a, b) => b.requests - a.requests),
+      jobs: jobs.map((j) => ({
+        ...j,
+        system: j.api_key_id ? keyName.get(j.api_key_id) ?? "Deleted key" : null,
+        tokens: totals.get(j.design_id) ?? null,
+      })),
     };
   });
 
@@ -91,13 +131,13 @@ export const listAppAiActivity = createServerFn({ method: "GET" })
 async function ownedJob(supabase: { from: Function } & any, userId: string, id: string) {
   const { data, error } = await supabase
     .from("design_jobs")
-    .select("id, design_id, status, mode, prompt, source")
+    .select("id, design_id, status, mode, prompt, source, api_key_id")
     .eq("id", id)
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Request not found");
-  return data as { id: string; design_id: string; status: string; mode: string; prompt: string; source: string };
+  return data as { id: string; design_id: string; status: string; mode: string; prompt: string; source: string; api_key_id: string | null };
 }
 
 export const cancelApiJob = createServerFn({ method: "POST" })
@@ -129,6 +169,7 @@ export const resubmitApiJob = createServerFn({ method: "POST" })
       mode: job.mode as never,
       prompt: job.prompt,
       source: (["api", "mcp", "app"].includes(job.source) ? job.source : "api") as "api",
+      apiKeyId: job.api_key_id,
     });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("design_jobs").update({ resubmitted_from: job.id }).eq("id", created.id);

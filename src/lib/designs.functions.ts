@@ -69,3 +69,23 @@ export const deleteDesign = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** Latest run of a design plus per-step timing and tokens, for the step breakdown. */
+export const getDesignSteps = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: job } = await context.supabase
+      .from("design_jobs")
+      .select("id, mode, status, attempts, max_attempts, last_error, created_at, started_at, finished_at, current_stage, stages_done, stage_started_at, locked_at")
+      .eq("design_id", data.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const { data: usage } = await context.supabase
+      .from("ai_usage")
+      .select("stage, total_tokens, duration_ms, created_at")
+      .eq("design_id", data.id)
+      .order("created_at", { ascending: true });
+    return { job: job ?? null, usage: usage ?? [] };
+  });

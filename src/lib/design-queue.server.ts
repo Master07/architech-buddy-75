@@ -18,6 +18,7 @@ export type EnqueueParams = {
   source: "api" | "mcp" | "app";
   threadId?: string;
   ownerScope?: string;
+  apiKeyId?: string | null;
 };
 
 /**
@@ -46,6 +47,7 @@ export async function enqueueDesignJob(params: EnqueueParams) {
       prompt: params.prompt,
       source: params.source,
       bypass_rls: Boolean(params.ownerScope),
+      api_key_id: params.apiKeyId ?? null,
     })
     .select("id, status, attempts, max_attempts, created_at")
     .single();
