@@ -101,11 +101,11 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
   const plan = planNextStep(mode, job.prompt, state);
   const stagesDone = Object.keys(state).length;
 
-  const finishDone = async (document: string) => {
+  const finishDone = async (document: string, doneCount = stagesDone) => {
     const now = new Date().toISOString();
     const { data: done } = await db
       .from("design_jobs")
-      .update({ status: "succeeded", locked_at: null, finished_at: now, updated_at: now, current_stage: null, stages_done: stagesDone, last_error: null })
+      .update({ status: "succeeded", locked_at: null, finished_at: now, updated_at: now, current_stage: null, stages_done: doneCount, last_error: null })
       .eq("id", job.id).eq("status", "running").select("id");
     if (!done?.length) return "stopped" as const;
     const heading = document.match(/^#\s+(.+)$/m)?.[1]?.trim();
@@ -184,7 +184,7 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
     if (!saved?.length) return "stopped";
     if (next.done) {
       // Re-read nothing: finish immediately with the saved state.
-      return finishDone(next.document);
+      return finishDone(next.document, stagesDone + 1);
     }
     return "advanced";
   } catch (error) {
