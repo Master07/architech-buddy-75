@@ -76,7 +76,40 @@ function LogsPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Every design request (API, IDE and app) with its wait and run time. Updates every 5 seconds.
         </p>
-        <div className="mt-6 overflow-x-auto border border-border">
+        <h2 className="font-display mt-6 text-lg font-semibold">By system</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Each API key counts as one system. Give every system its own key to tell them apart.
+        </p>
+        <div className="mt-4 overflow-x-auto border border-border">
+          <table className="w-full text-sm">
+            <thead className="label-mono bg-secondary text-left text-muted-foreground">
+              <tr>
+                <th className="p-2">System</th>
+                <th className="p-2">Requests</th>
+                <th className="p-2">Succeeded</th>
+                <th className="p-2">Failed</th>
+                <th className="p-2">Tokens</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(logs.data?.systems ?? []).map((s) => (
+                <tr key={s.key} className="border-t border-border">
+                  <td className="p-2">{s.name}</td>
+                  <td className="p-2">{s.requests}</td>
+                  <td className="p-2">{s.succeeded}</td>
+                  <td className="p-2">{s.failed}</td>
+                  <td className="p-2">{tok(s.tokens)}</td>
+                </tr>
+              ))}
+              {logs.data?.systems.length === 0 && (
+                <tr><td colSpan={5} className="p-4 text-muted-foreground">No requests yet.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 className="font-display mt-10 text-lg font-semibold">Requests</h2>
+        <div className="mt-4 overflow-x-auto border border-border">
           <table className="w-full text-sm">
             <thead className="label-mono bg-secondary text-left text-muted-foreground">
               <tr>
@@ -104,7 +137,7 @@ function LogsPage() {
                     <td className="max-w-xs p-2">
                       <p className="line-clamp-2">{j.prompt}</p>
                       <p className="label-mono mt-1 text-muted-foreground">
-                        {j.mode} · {j.source}
+                        {j.mode} · {j.system ?? j.source}
                         {j.attempts > 1 ? ` · try ${j.attempts}` : ""}
                         {j.resubmitted_from ? " · resubmitted" : ""}
                       </p>

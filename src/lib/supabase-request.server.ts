@@ -31,6 +31,7 @@ export type RequestAuth = {
   supabase: SupabaseClient<Database>;
   userId: string;
   via: "session" | "api_key";
+  apiKeyId?: string;
 };
 
 export class AuthError extends Error {
@@ -87,7 +88,7 @@ export async function authenticateRequest(request: Request): Promise<RequestAuth
       .from("api_keys")
       .update({ last_used_at: new Date().toISOString() })
       .eq("id", data.id);
-    return { supabase: supabaseAdmin as SupabaseClient<Database>, userId: data.user_id, via: "api_key" };
+    return { supabase: supabaseAdmin as SupabaseClient<Database>, userId: data.user_id, via: "api_key", apiKeyId: data.id };
   }
 
   if (token.split(".").length !== 3) throw new AuthError("Invalid token");
