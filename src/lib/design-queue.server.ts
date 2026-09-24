@@ -112,6 +112,8 @@ export async function processNextDesignJob(): Promise<boolean> {
       .from("design_jobs")
       .update({
         status: exhausted ? "failed" : "queued",
+        current_stage: null,
+        stages_done: 0,
         last_error: message,
         locked_at: null,
         finished_at: exhausted ? now : null,
