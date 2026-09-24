@@ -53,6 +53,65 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_usage: {
+        Row: {
+          created_at: string
+          design_id: string | null
+          duration_ms: number | null
+          id: string
+          input_tokens: number
+          kind: string
+          label: string | null
+          model: string | null
+          output_tokens: number
+          request_id: string
+          stage: string | null
+          thread_id: string | null
+          total_tokens: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          design_id?: string | null
+          duration_ms?: number | null
+          id?: string
+          input_tokens?: number
+          kind: string
+          label?: string | null
+          model?: string | null
+          output_tokens?: number
+          request_id: string
+          stage?: string | null
+          thread_id?: string | null
+          total_tokens?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          design_id?: string | null
+          duration_ms?: number | null
+          id?: string
+          input_tokens?: number
+          kind?: string
+          label?: string | null
+          model?: string | null
+          output_tokens?: number
+          request_id?: string
+          stage?: string | null
+          thread_id?: string | null
+          total_tokens?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_design_id_fkey"
+            columns: ["design_id"]
+            isOneToOne: false
+            referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
