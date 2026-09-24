@@ -77,23 +77,37 @@ export async function processNextDesignJob(): Promise<boolean> {
   try {
     const { finished } = await streamDesignInto(params, job.design_id);
     await finished;
-    await db
+    const now = new Date().toISOString();
+    const { data: done } = await db
       .from("design_jobs")
-      .update({ status: "succeeded", locked_at: null, updated_at: new Date().toISOString() })
-      .eq("id", job.id);
+      .update({ status: "succeeded", locked_at: null, finished_at: now, updated_at: now })
+      .eq("id", job.id)
+      .eq("status", "running")
+      .select("id");
+    if (!done?.length) {
+      // Cancelled while running: discard the result.
+      await db
+        .from("designs")
+        .update({ status: "failed", error: "Cancelled by user" })
+        .eq("id", job.design_id);
+    }
   } catch (error) {
     const message = (error as Error).message.slice(0, 500);
     const exhausted = job.attempts >= job.max_attempts;
-    await db
+    const now = new Date().toISOString();
+    const { data: updated } = await db
       .from("design_jobs")
       .update({
         status: exhausted ? "failed" : "queued",
         last_error: message,
         locked_at: null,
-        updated_at: new Date().toISOString(),
+        finished_at: exhausted ? now : null,
+        updated_at: now,
       })
-      .eq("id", job.id);
-    if (!exhausted) {
+      .eq("id", job.id)
+      .eq("status", "running")
+      .select("id");
+    if (!exhausted && updated?.length) {
       // Leave the design row in `running` so a retry can still finish it.
       await db.from("designs").update({ status: "running", error: message }).eq("id", job.design_id);
     }

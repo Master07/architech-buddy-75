@@ -133,13 +133,16 @@ export type Database = {
           bypass_rls: boolean
           created_at: string
           design_id: string
+          finished_at: string | null
           id: string
           last_error: string | null
           locked_at: string | null
           max_attempts: number
           mode: string
           prompt: string
+          resubmitted_from: string | null
           source: string
+          started_at: string | null
           status: string
           updated_at: string
           user_id: string
@@ -149,13 +152,16 @@ export type Database = {
           bypass_rls?: boolean
           created_at?: string
           design_id: string
+          finished_at?: string | null
           id?: string
           last_error?: string | null
           locked_at?: string | null
           max_attempts?: number
           mode: string
           prompt: string
+          resubmitted_from?: string | null
           source?: string
+          started_at?: string | null
           status?: string
           updated_at?: string
           user_id: string
@@ -165,13 +171,16 @@ export type Database = {
           bypass_rls?: boolean
           created_at?: string
           design_id?: string
+          finished_at?: string | null
           id?: string
           last_error?: string | null
           locked_at?: string | null
           max_attempts?: number
           mode?: string
           prompt?: string
+          resubmitted_from?: string | null
           source?: string
+          started_at?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -182,6 +191,13 @@ export type Database = {
             columns: ["design_id"]
             isOneToOne: false
             referencedRelation: "designs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "design_jobs_resubmitted_from_fkey"
+            columns: ["resubmitted_from"]
+            isOneToOne: false
+            referencedRelation: "design_jobs"
             referencedColumns: ["id"]
           },
         ]
@@ -420,13 +436,16 @@ export type Database = {
           bypass_rls: boolean
           created_at: string
           design_id: string
+          finished_at: string | null
           id: string
           last_error: string | null
           locked_at: string | null
           max_attempts: number
           mode: string
           prompt: string
+          resubmitted_from: string | null
           source: string
+          started_at: string | null
           status: string
           updated_at: string
           user_id: string
