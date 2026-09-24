@@ -188,6 +188,7 @@ export type Database = {
       }
       design_jobs: {
         Row: {
+          api_key_id: string | null
           attempts: number
           bypass_rls: boolean
           created_at: string
@@ -210,6 +211,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          api_key_id?: string | null
           attempts?: number
           bypass_rls?: boolean
           created_at?: string
@@ -232,6 +234,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          api_key_id?: string | null
           attempts?: number
           bypass_rls?: boolean
           created_at?: string
@@ -254,6 +257,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "design_jobs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "design_jobs_design_id_fkey"
             columns: ["design_id"]
@@ -500,6 +510,7 @@ export type Database = {
       claim_design_job: {
         Args: never
         Returns: {
+          api_key_id: string | null
           attempts: number
           bypass_rls: boolean
           created_at: string
