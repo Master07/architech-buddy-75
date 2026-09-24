@@ -92,6 +92,13 @@ export async function streamDesignInto(params: DesignJobParams, designId: string
       messages: [{ role: "user", content: params.prompt }],
       ...(params.threadId ? { threadId: params.threadId } : {}),
       ...(params.ownerScope ? { ownerScope: params.ownerScope } : {}),
+      usage: {
+        requestId: designId,
+        kind: "design_job",
+        designId,
+        label: params.prompt,
+        ...(params.threadId ? { threadId: params.threadId } : {}),
+      },
     },
     {
       onStage: ({ stage, result }) => {
