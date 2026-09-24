@@ -30,6 +30,13 @@ export const Route = createFileRoute("/api/public/v1/designs/$id")({
             .eq("user_id", auth.userId)
             .maybeSingle();
 
+          // Self-heal: a queued job (or one whose worker died) gets picked up on poll.
+          if (job && (job.status === "queued" || job.status === "running")) {
+            const { drainDesignQueue } = await import("@/lib/design-queue.server");
+            const { runInBackground } = await import("@/lib/background.server");
+            runInBackground(drainDesignQueue(1));
+          }
+
           return Response.json({ design: data, job: job ?? null }, { headers: CORS });
 
         } catch (error) {
