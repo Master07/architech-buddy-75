@@ -126,9 +126,13 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
   let cancelled = false;
   const deadline = setTimeout(() => abort.abort("Step deadline exceeded"), STEP_DEADLINE_MS);
   let lastBeat = Date.now();
+  let inflight: Promise<unknown> = Promise.resolve();
+  let stopped = false;
   const watcher = setInterval(() => {
-    void (async () => {
+    if (stopped) return;
+    inflight = (async () => {
       const { data } = await db.from("design_jobs").select("status").eq("id", job.id).maybeSingle();
+      if (stopped) return;
       if (data?.status !== "running") {
         cancelled = true;
         abort.abort("Cancelled by user");
@@ -136,10 +140,23 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
       }
       if (Date.now() - lastBeat >= HEARTBEAT_MS) {
         lastBeat = Date.now();
-        await db.from("design_jobs").update({ locked_at: new Date().toISOString() }).eq("id", job.id).eq("status", "running");
+        await db.from("design_jobs").update({ locked_at: new Date().toISOString() }).eq("id", job.id).eq("status", "running").not("locked_at", "is", null);
       }
     })().catch(() => undefined);
   }, 3000);
+  // Lease writes must never land after the step's result is saved.
+  const stopWatcher = async () => {
+    stopped = true;
+    clearInterval(watcher);
+    await inflight;
+  };
+
+  {
+    const now = new Date().toISOString();
+    await db.from("design_jobs")
+      .update({ current_stage: plan.stage, stages_done: stagesDone, stage_started_at: now, updated_at: now, locked_at: now })
+      .eq("id", job.id).eq("status", "running");
+  }
 
   try {
     const text = await runSingleStage(
@@ -154,13 +171,9 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
       },
       plan.stage,
       plan.messages,
-      () => {
-        const now = new Date().toISOString();
-        void db.from("design_jobs")
-          .update({ current_stage: plan.stage, stages_done: stagesDone, stage_started_at: now, updated_at: now, locked_at: now })
-          .eq("id", job.id).eq("status", "running").then(() => undefined, () => undefined);
-      },
     );
+    await stopWatcher();
+    if (cancelled) return "stopped";
     const nextState = { ...state, [plan.key]: text };
     const next = planNextStep(mode, job.prompt, nextState);
     const now = new Date().toISOString();
@@ -175,6 +188,7 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
     }
     return "advanced";
   } catch (error) {
+    await stopWatcher();
     if (cancelled) return "stopped";
     const failure = abort.signal.aborted
       ? { kind: "retry" as const, message: "The AI step took over 12 minutes and was retried" }
@@ -198,6 +212,7 @@ async function runJobStep(db: Admin, job: Job): Promise<"advanced" | "finished" 
     return "stopped";
   } finally {
     clearTimeout(deadline);
+    stopped = true;
     clearInterval(watcher);
   }
 }
