@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RotateCcw, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { estimateProgress, STAGE_NAMES } from "@/lib/job-progress";
 import { listApiLogs, listAppAiActivity, cancelApiJob, resubmitApiJob } from "@/lib/api-logs.functions";
 
 export const Route = createFileRoute("/_authenticated/app/logs")({
@@ -89,12 +90,13 @@ function LogsPage() {
               </tr>
             </thead>
             <tbody>
-              {(logs.data ?? []).map((j) => {
+              {(logs.data?.jobs ?? []).map((j) => {
                 const created = new Date(j.created_at).getTime();
                 const started = j.started_at ? new Date(j.started_at).getTime() : null;
                 const finished = j.finished_at ? new Date(j.finished_at).getTime() : null;
                 const active = j.status === "queued" || j.status === "running";
                 const waited = started ? started - created : active ? now - created : null;
+                const prog = estimateProgress(j, logs.data?.avgRunMs[j.mode] ?? null, now);
                 const ran = started ? (finished ?? (active ? now : started)) - started : null;
                 return (
                   <tr key={j.id} className="border-t border-border align-top">
@@ -114,6 +116,22 @@ function LogsPage() {
                       <span className={`label-mono ${j.status === "failed" ? "text-destructive" : j.status === "succeeded" ? "" : "text-primary"}`}>
                         {j.status}
                       </span>
+                      {j.status === "running" && (
+                        <div className="mt-2 w-36">
+                          <div className="h-2 border border-foreground">
+                            <div className="h-full bg-primary transition-all" style={{ width: `${prog.percent}%` }} />
+                          </div>
+                          <p className="label-mono mt-1 text-muted-foreground">
+                            {prog.percent}%{j.current_stage ? ` · ${STAGE_NAMES[j.current_stage] ?? j.current_stage}` : ""}
+                          </p>
+                          <p className="label-mono text-muted-foreground">
+                            {prog.remainingMs == null ? "estimating…" : prog.remainingMs === 0 ? "finishing up…" : `~${fmt(prog.remainingMs)} left`}
+                          </p>
+                        </div>
+                      )}
+                      {j.status === "queued" && prog.remainingMs != null && (
+                        <p className="label-mono mt-1 text-muted-foreground">usually takes ~{fmt(prog.remainingMs)}</p>
+                      )}
                     </td>
                     <td className="whitespace-nowrap p-2">{waited == null ? "—" : fmt(Math.max(0, waited))}</td>
                     <td className="whitespace-nowrap p-2">{ran == null ? "—" : fmt(Math.max(0, ran))}</td>
@@ -132,7 +150,7 @@ function LogsPage() {
                   </tr>
                 );
               })}
-              {logs.data?.length === 0 && (
+              {logs.data?.jobs.length === 0 && (
                 <tr><td colSpan={7} className="p-4 text-muted-foreground">No requests yet.</td></tr>
               )}
             </tbody>
