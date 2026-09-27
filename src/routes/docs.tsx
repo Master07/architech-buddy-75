@@ -33,7 +33,7 @@ const STREAM = `curl -N -X POST ${BASE}/design \\
 
 # Server-Sent Events: design.started → delta … → design.completed`;
 
-const ENDPOINTS = [
+const ENDPOINTS: [string, string, string][] = [
   ["POST", "/design", "Start a design, review, stack recommendation or interview. Returns 202 and a design id."],
   ["GET", "/designs/:id", "Status, progress, estimated time left, and the finished document."],
   ["GET", "/designs", "List your saved designs."],

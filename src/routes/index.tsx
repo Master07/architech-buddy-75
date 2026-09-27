@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Interview-driven AI architect that produces full system design documents, reviews existing architectures, and cites your own system design books.",
+          "Interview-driven AI architect that produces full system design documents, reviews existing architectures, and cites your own internal docs and references.",
       },
       { property: "og:title", content: "System Design Architect — AI system design partner" },
       {
