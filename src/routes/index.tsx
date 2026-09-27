@@ -56,58 +56,43 @@ const FEATURES = [
   },
 ];
 
+const AUDIENCE = [
+  { title: "Senior engineers & developers", body: "Write the design doc before the first line of code." },
+  { title: "Architecture review teams", body: "Score existing designs against a rigorous checklist." },
+  { title: "Solo founders", body: "Get a second opinion on your stack and scaling path." },
+  { title: "Interview prep", body: "Practise with scoped questions and full worked answers." },
+];
+
 function Landing() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-10 border-b border-border bg-background">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="grid size-7 place-items-center border border-border">
-              <GitBranch className="size-4 text-foreground" />
-            </div>
-            <span className="font-display text-sm tracking-tight">SDA</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <span className="signal-dot label-mono hidden text-foreground sm:block">Home</span>
-            <Button asChild size="sm" variant="ghost">
-              <Link to="/auth" className="label-mono">
-                Docs
-              </Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/auth" className="label-mono">
-                Sign in
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main>
         <section className="border-b border-border">
           <div className="mx-auto max-w-6xl px-6 py-24">
-            <h1 className="max-w-3xl text-balance leading-[1.15]">
-              System Design
-              <br />
-              Architect
-            </h1>
-            <div className="mt-8 space-y-1 text-base text-muted-foreground">
-              <p>Design scalable systems.</p>
-              <p>Make informed architectural decisions.</p>
-              <p>Build with clarity and confidence.</p>
-            </div>
+            <p className="label-mono text-primary">Free during beta · access by approval</p>
+            <h1 className="mt-6 max-w-4xl text-balance leading-[1.15]">Design before you implement</h1>
+            <p className="mt-8 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              Requirements, capacity math, diagrams, trade-offs and failure modes — grounded in
+              your own internal docs and references.
+            </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link to="/auth" className="label-mono">
-                  Start a design <ArrowRight className="ml-1 size-4" />
+                  Request access <ArrowRight className="ml-1 size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link to="/auth" className="label-mono">
-                  View the API
-                </Link>
+                <Link to="/samples" className="label-mono">See a sample doc</Link>
+              </Button>
+              <Button asChild size="lg" variant="ghost">
+                <Link to="/docs" className="label-mono">View the API</Link>
               </Button>
             </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              New accounts join a waitlist and can start designing once approved.
+            </p>
 
             <div className="mt-20 grid w-full gap-px border-t border-border bg-border pt-px md:grid-cols-3">
               {BAND.map((item) => (
@@ -124,6 +109,21 @@ function Landing() {
             </div>
           </div>
         </section>
+
+        <section className="border-b border-border">
+          <div className="mx-auto max-w-6xl px-6 py-16">
+            <p className="label-mono text-primary">Who it is for</p>
+            <div className="mt-6 grid gap-6 md:grid-cols-4">
+              {AUDIENCE.map((a) => (
+                <div key={a.title}>
+                  <h2 className="text-sm">{a.title}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{a.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
 
 
         <section id="how-it-works" className="border-b border-border">

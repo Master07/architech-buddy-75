@@ -11,10 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiReviewRouteImport } from './routes/api/review'
+import { Route as SamplesIndexRouteImport } from './routes/samples.index'
+import { Route as SamplesSlugRouteImport } from './routes/samples.$slug'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppThreadIdRouteImport } from './routes/_authenticated/app.$threadId'
 import { Route as AuthenticatedAppApiRouteImport } from './routes/_authenticated/app.api'
@@ -39,9 +45,29 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
@@ -57,6 +83,16 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const ApiReviewRoute = ApiReviewRouteImport.update({
   id: '/api/review',
   path: '/api/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SamplesIndexRoute = SamplesIndexRouteImport.update({
+  id: '/samples/',
+  path: '/samples/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SamplesSlugRoute = SamplesSlugRouteImport.update({
+  id: '/samples/$slug',
+  path: '/samples/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
@@ -134,10 +170,16 @@ const ApiPublicV1JobsDesignRoute = ApiPublicV1JobsDesignRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/docs': typeof DocsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/review': typeof ApiReviewRoute
+  '/samples/$slug': typeof SamplesSlugRoute
+  '/samples/': typeof SamplesIndexRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
   '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
@@ -155,9 +197,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/docs': typeof DocsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/api/chat': typeof ApiChatRoute
   '/api/review': typeof ApiReviewRoute
+  '/samples/$slug': typeof SamplesSlugRoute
+  '/samples': typeof SamplesIndexRoute
   '/app/$threadId': typeof AuthenticatedAppThreadIdRoute
   '/app/api': typeof AuthenticatedAppApiRoute
   '/app/designs': typeof AuthenticatedAppDesignsRoute
@@ -177,10 +225,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/docs': typeof DocsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/review': typeof ApiReviewRoute
+  '/samples/$slug': typeof SamplesSlugRoute
+  '/samples/': typeof SamplesIndexRoute
   '/_authenticated/app/$threadId': typeof AuthenticatedAppThreadIdRoute
   '/_authenticated/app/api': typeof AuthenticatedAppApiRoute
   '/_authenticated/app/designs': typeof AuthenticatedAppDesignsRoute
@@ -200,10 +254,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
+    | '/docs'
+    | '/privacy'
+    | '/terms'
     | '/app'
     | '/api/chat'
     | '/api/review'
+    | '/samples/$slug'
+    | '/samples/'
     | '/app/$threadId'
     | '/app/api'
     | '/app/designs'
@@ -221,9 +281,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
+    | '/docs'
+    | '/privacy'
+    | '/terms'
     | '/api/chat'
     | '/api/review'
+    | '/samples/$slug'
+    | '/samples'
     | '/app/$threadId'
     | '/app/api'
     | '/app/designs'
@@ -242,10 +308,16 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/about'
     | '/auth'
+    | '/docs'
+    | '/privacy'
+    | '/terms'
     | '/_authenticated/app'
     | '/api/chat'
     | '/api/review'
+    | '/samples/$slug'
+    | '/samples/'
     | '/_authenticated/app/$threadId'
     | '/_authenticated/app/api'
     | '/_authenticated/app/designs'
@@ -265,9 +337,15 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  DocsRoute: typeof DocsRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiReviewRoute: typeof ApiReviewRoute
+  SamplesSlugRoute: typeof SamplesSlugRoute
+  SamplesIndexRoute: typeof SamplesIndexRoute
   ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
   ApiPublicV1KnowledgeRoute: typeof ApiPublicV1KnowledgeRoute
   ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
@@ -291,11 +369,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -317,6 +423,20 @@ declare module '@tanstack/react-router' {
       path: '/api/review'
       fullPath: '/api/review'
       preLoaderRoute: typeof ApiReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/samples/': {
+      id: '/samples/'
+      path: '/samples'
+      fullPath: '/samples/'
+      preLoaderRoute: typeof SamplesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/samples/$slug': {
+      id: '/samples/$slug'
+      path: '/samples/$slug'
+      fullPath: '/samples/$slug'
+      preLoaderRoute: typeof SamplesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/': {
@@ -461,9 +581,15 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  DocsRoute: DocsRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
   ApiChatRoute: ApiChatRoute,
   ApiReviewRoute: ApiReviewRoute,
+  SamplesSlugRoute: SamplesSlugRoute,
+  SamplesIndexRoute: SamplesIndexRoute,
   ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
   ApiPublicV1KnowledgeRoute: ApiPublicV1KnowledgeRoute,
   ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,
