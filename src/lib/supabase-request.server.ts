@@ -84,6 +84,7 @@ export async function authenticateRequest(request: Request): Promise<RequestAuth
       .maybeSingle();
     if (error) throw new AuthError("Could not verify API key", 500);
     if (!data || data.revoked) throw new AuthError("Invalid or revoked API key");
+    await assertApproved(data.user_id);
     await supabaseAdmin
       .from("api_keys")
       .update({ last_used_at: new Date().toISOString() })
@@ -95,5 +96,14 @@ export async function authenticateRequest(request: Request): Promise<RequestAuth
   const supabase = supabaseForToken(token);
   const { data, error } = await supabase.auth.getClaims(token);
   if (error || !data?.claims?.sub) throw new AuthError("Invalid token");
+  await assertApproved(data.claims.sub);
   return { supabase, userId: data.claims.sub, via: "session" };
+}
+
+/** Waitlisted (not yet approved) accounts cannot use the API. */
+async function assertApproved(userId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin.rpc("is_approved", { _user_id: userId });
+  if (error) throw new AuthError("Could not verify account access", 500);
+  if (data !== true) throw new AuthError("Your account is on the waitlist and has not been approved yet", 403);
 }
