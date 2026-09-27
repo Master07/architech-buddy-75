@@ -95,7 +95,7 @@ function SamplePage() {
 
         <div className="mt-16 border-t border-border pt-8">
           <p className="text-sm text-muted-foreground">Want one for your own system? Access is by approval, free during beta.</p>
-          <Button asChild className="mt-4"><Link to="/auth" className="label-mono">Request access</Link></Button>
+          <Button asChild className="mt-4"><Link to="/waitlist" className="label-mono">Join the waitlist</Link></Button>
         </div>
       </article>
     </PageShell>
