@@ -24,7 +24,7 @@ export const getQueueDashboard = createServerFn({ method: "GET" })
         .gte("created_at", since)
         .order("finished_at", { ascending: false })
         .limit(100),
-      db.from("ai_usage").select("stage, duration_ms, total_tokens").eq("kind", "design").gte("created_at", since).limit(5000),
+      db.from("ai_usage").select("stage, duration_ms, total_tokens").eq("kind", "design_job").gte("created_at", since).limit(5000),
     ]);
     if (active.error) throw new Error(active.error.message);
     if (recent.error) throw new Error(recent.error.message);
