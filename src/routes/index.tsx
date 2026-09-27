@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { MODE_META, DESIGN_MODES } from "@/lib/design-agent";
 import { ArrowRight, BookOpen, GitBranch, Plug, ShieldCheck, Zap } from "lucide-react";
 
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/")({
           "Design before you implement. Requirements, capacity math, diagrams, trade-offs and failure modes — grounded in your own library.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://sda.corbetai.com/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
@@ -33,8 +35,8 @@ const BAND = [
   },
   {
     icon: BookOpen,
-    title: "Your own books",
-    body: "Upload the books and internal docs you trust. Passages are cited inline.",
+    title: "Your own references",
+    body: "Upload internal docs and references you have rights to. Passages are cited inline.",
   },
   {
     icon: Plug,
@@ -141,7 +143,7 @@ function Landing() {
               />
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              New accounts join a short waitlist and get access once approved.
+              Free during beta. New accounts are approved from a waitlist.
             </p>
           </div>
         </section>
@@ -200,11 +202,7 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-6 py-8 text-xs text-muted-foreground">
-          System Design Architect — design documents, reviews, and stack recommendations.
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
