@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiReviewRouteImport } from './routes/api/review'
@@ -28,6 +29,7 @@ import { Route as AuthenticatedAppDesignsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authenticated/app.library'
 import { Route as AuthenticatedAppLogsRouteImport } from './routes/_authenticated/app.logs'
 import { Route as AuthenticatedAppModelRouteImport } from './routes/_authenticated/app.model'
+import { Route as AuthenticatedAppQueueRouteImport } from './routes/_authenticated/app.queue'
 import { Route as AuthenticatedAppReviewRouteImport } from './routes/_authenticated/app.review'
 import { Route as AuthenticatedAppWaitlistRouteImport } from './routes/_authenticated/app.waitlist'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
@@ -68,6 +70,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WaitlistRoute = WaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
@@ -131,6 +138,11 @@ const AuthenticatedAppModelRoute = AuthenticatedAppModelRouteImport.update({
   path: '/model',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppQueueRoute = AuthenticatedAppQueueRouteImport.update({
+  id: '/queue',
+  path: '/queue',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppReviewRoute = AuthenticatedAppReviewRouteImport.update({
   id: '/review',
   path: '/review',
@@ -175,6 +187,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/review': typeof ApiReviewRoute
@@ -186,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/app/library': typeof AuthenticatedAppLibraryRoute
   '/app/logs': typeof AuthenticatedAppLogsRoute
   '/app/model': typeof AuthenticatedAppModelRoute
+  '/app/queue': typeof AuthenticatedAppQueueRoute
   '/app/review': typeof AuthenticatedAppReviewRoute
   '/app/waitlist': typeof AuthenticatedAppWaitlistRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -202,6 +216,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/api/chat': typeof ApiChatRoute
   '/api/review': typeof ApiReviewRoute
   '/samples/$slug': typeof SamplesSlugRoute
@@ -212,6 +227,7 @@ export interface FileRoutesByTo {
   '/app/library': typeof AuthenticatedAppLibraryRoute
   '/app/logs': typeof AuthenticatedAppLogsRoute
   '/app/model': typeof AuthenticatedAppModelRoute
+  '/app/queue': typeof AuthenticatedAppQueueRoute
   '/app/review': typeof AuthenticatedAppReviewRoute
   '/app/waitlist': typeof AuthenticatedAppWaitlistRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -230,6 +246,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/waitlist': typeof WaitlistRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/review': typeof ApiReviewRoute
@@ -241,6 +258,7 @@ export interface FileRoutesById {
   '/_authenticated/app/library': typeof AuthenticatedAppLibraryRoute
   '/_authenticated/app/logs': typeof AuthenticatedAppLogsRoute
   '/_authenticated/app/model': typeof AuthenticatedAppModelRoute
+  '/_authenticated/app/queue': typeof AuthenticatedAppQueueRoute
   '/_authenticated/app/review': typeof AuthenticatedAppReviewRoute
   '/_authenticated/app/waitlist': typeof AuthenticatedAppWaitlistRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -259,6 +277,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/privacy'
     | '/terms'
+    | '/waitlist'
     | '/app'
     | '/api/chat'
     | '/api/review'
@@ -270,6 +289,7 @@ export interface FileRouteTypes {
     | '/app/library'
     | '/app/logs'
     | '/app/model'
+    | '/app/queue'
     | '/app/review'
     | '/app/waitlist'
     | '/app/'
@@ -286,6 +306,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/privacy'
     | '/terms'
+    | '/waitlist'
     | '/api/chat'
     | '/api/review'
     | '/samples/$slug'
@@ -296,6 +317,7 @@ export interface FileRouteTypes {
     | '/app/library'
     | '/app/logs'
     | '/app/model'
+    | '/app/queue'
     | '/app/review'
     | '/app/waitlist'
     | '/app'
@@ -313,6 +335,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/privacy'
     | '/terms'
+    | '/waitlist'
     | '/_authenticated/app'
     | '/api/chat'
     | '/api/review'
@@ -324,6 +347,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/library'
     | '/_authenticated/app/logs'
     | '/_authenticated/app/model'
+    | '/_authenticated/app/queue'
     | '/_authenticated/app/review'
     | '/_authenticated/app/waitlist'
     | '/_authenticated/app/'
@@ -342,6 +366,7 @@ export interface RootRouteChildren {
   DocsRoute: typeof DocsRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  WaitlistRoute: typeof WaitlistRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiReviewRoute: typeof ApiReviewRoute
   SamplesSlugRoute: typeof SamplesSlugRoute
@@ -402,6 +427,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/waitlist': {
+      id: '/waitlist'
+      path: '/waitlist'
+      fullPath: '/waitlist'
+      preLoaderRoute: typeof WaitlistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app': {
@@ -488,6 +520,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppModelRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/queue': {
+      id: '/_authenticated/app/queue'
+      path: '/queue'
+      fullPath: '/app/queue'
+      preLoaderRoute: typeof AuthenticatedAppQueueRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/review': {
       id: '/_authenticated/app/review'
       path: '/review'
@@ -547,6 +586,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppLibraryRoute: typeof AuthenticatedAppLibraryRoute
   AuthenticatedAppLogsRoute: typeof AuthenticatedAppLogsRoute
   AuthenticatedAppModelRoute: typeof AuthenticatedAppModelRoute
+  AuthenticatedAppQueueRoute: typeof AuthenticatedAppQueueRoute
   AuthenticatedAppReviewRoute: typeof AuthenticatedAppReviewRoute
   AuthenticatedAppWaitlistRoute: typeof AuthenticatedAppWaitlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
@@ -559,6 +599,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppLibraryRoute: AuthenticatedAppLibraryRoute,
   AuthenticatedAppLogsRoute: AuthenticatedAppLogsRoute,
   AuthenticatedAppModelRoute: AuthenticatedAppModelRoute,
+  AuthenticatedAppQueueRoute: AuthenticatedAppQueueRoute,
   AuthenticatedAppReviewRoute: AuthenticatedAppReviewRoute,
   AuthenticatedAppWaitlistRoute: AuthenticatedAppWaitlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
@@ -586,6 +627,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsRoute: DocsRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  WaitlistRoute: WaitlistRoute,
   ApiChatRoute: ApiChatRoute,
   ApiReviewRoute: ApiReviewRoute,
   SamplesSlugRoute: SamplesSlugRoute,

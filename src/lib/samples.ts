@@ -8,6 +8,8 @@ export type Sample = {
   decisions: { choice: string; rejected: string; why: string }[];
   failures: { failure: string; mitigation: string }[];
   scaling: string[];
+  /** True when the page shows an unedited document produced by the tool. */
+  realDoc?: boolean;
 };
 
 export const SAMPLES: Sample[] = [
@@ -67,6 +69,7 @@ export const SAMPLES: Sample[] = [
   },
   {
     slug: "rate-limiter",
+    realDoc: true,
     title: "Design a rate limiter",
     summary:
       "A distributed rate limiter in front of a public API: 50k requests/s across 20 gateway nodes, per-API-key limits, under 2 ms added latency.",

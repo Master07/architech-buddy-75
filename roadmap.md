@@ -8,7 +8,8 @@
 - [x] Waitlist: new sign-ups wait for admin approval; admin page at /app/waitlist; API blocks unapproved accounts
 - [x] Narrated how-to video on the home page
 - [x] Public landing fixes: samples, docs, about, privacy, terms, new headline
-- [ ] New voiceover script for the home page video
-- [ ] Public waitlist sign-up page with email notifications
-- [ ] Real tool-generated design as a live sample
-- [ ] Live queue dashboard (queued / running / completed, step progress, bottlenecks)
+- [x] New voiceover script for the home page video
+- [x] Public waitlist sign-up page (/waitlist) + admin list
+- [ ] Email you on each sign-up — blocked: needs an email sending domain set up
+- [x] Real tool-generated design as a live sample
+- [x] Live queue dashboard (queued / running / completed, step progress, bottlenecks)
