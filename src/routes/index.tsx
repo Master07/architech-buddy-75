@@ -81,8 +81,8 @@ function Landing() {
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/auth" className="label-mono">
-                  Request access <ArrowRight className="ml-1 size-4" />
+                <Link to="/waitlist" className="label-mono">
+                  Join the waitlist <ArrowRight className="ml-1 size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -93,7 +93,7 @@ function Landing() {
               </Button>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              New accounts join a waitlist and can start designing once approved.
+              Already approved? <Link to="/auth" className="underline">Sign in</Link>.
             </p>
 
             <div className="mt-20 grid w-full gap-px border-t border-border bg-border pt-px md:grid-cols-3">

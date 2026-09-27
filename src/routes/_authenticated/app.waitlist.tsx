@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { listSignups } from "@/lib/signups.functions";
 import { decideWaitlist, getMyAccess, listWaitlist } from "@/lib/waitlist.functions";
 
 export const Route = createFileRoute("/_authenticated/app/waitlist")({
@@ -20,6 +21,11 @@ function WaitlistAdmin() {
   const list = useQuery({
     queryKey: ["waitlist"],
     queryFn: () => listWaitlist(),
+    enabled: access.data?.isAdmin === true,
+  });
+  const signups = useQuery({
+    queryKey: ["waitlist-signups"],
+    queryFn: () => listSignups(),
     enabled: access.data?.isAdmin === true,
   });
 
@@ -102,6 +108,19 @@ function WaitlistAdmin() {
               )}
             </tbody>
           </table>
+        </div>
+        <h2 className="mt-12 text-lg">Sign-ups from the public page</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Visitors who joined at /waitlist without making an account.</p>
+        <div className="mt-4 border border-border text-sm">
+          {(signups.data ?? []).map((s) => (
+            <div key={s.id} className="grid gap-1 border-b border-border p-3 last:border-b-0 md:grid-cols-4">
+              <span className="truncate">{s.email}</span>
+              <span className="text-muted-foreground">{s.name ?? "—"}</span>
+              <span className="text-muted-foreground">{s.use_case ?? "—"}{s.note ? ` · ${s.note}` : ""}</span>
+              <span className="text-muted-foreground md:text-right">{new Date(s.created_at).toLocaleString()}</span>
+            </div>
+          ))}
+          {signups.data?.length === 0 && <p className="p-4 text-muted-foreground">No sign-ups yet.</p>}
         </div>
       </div>
     </div>

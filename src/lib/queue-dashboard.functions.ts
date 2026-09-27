@@ -43,14 +43,11 @@ export const getQueueDashboard = createServerFn({ method: "GET" })
       .map(([stage, s]) => ({ stage, calls: s.count, avgMs: Math.round(s.totalMs / s.count), maxMs: s.maxMs, avgTokens: Math.round(s.tokens / s.count) }))
       .sort((a, b) => b.avgMs - a.avgMs);
 
-    const { data: q } = await db.schema("private" as never).from("design_queue_state" as never).select("paused_until, paused_reason").maybeSingle();
-    const pause = q as { paused_until: string | null; paused_reason: string | null } | null;
-
     return {
       now: new Date().toISOString(),
       active: active.data ?? [],
       recent: recent.data ?? [],
       stageStats,
-      paused: pause?.paused_until && new Date(pause.paused_until) > new Date() ? pause : null,
+      paused: null as { paused_until: string | null; paused_reason: string | null } | null,
     };
   });

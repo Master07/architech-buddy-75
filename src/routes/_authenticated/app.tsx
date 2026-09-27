@@ -90,7 +90,7 @@ function AppShell() {
         </div>
 
         <nav className="space-y-1 border-b border-sidebar-border p-3">
-          {[...NAV, ...(access.data?.isAdmin ? [{ to: "/app/waitlist", label: "Waitlist", icon: Users }] as const : [])].map((item) => (
+          {[...NAV, ...(access.data?.isAdmin ? [{ to: "/app/waitlist", label: "Waitlist", icon: Users }, { to: "/app/queue", label: "Live queue", icon: Hourglass }] as const : [])].map((item) => (
             <Link
               key={item.to}
               to={item.to}
