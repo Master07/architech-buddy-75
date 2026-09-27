@@ -23,6 +23,7 @@ import { Route as AuthenticatedAppLibraryRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppLogsRouteImport } from './routes/_authenticated/app.logs'
 import { Route as AuthenticatedAppModelRouteImport } from './routes/_authenticated/app.model'
 import { Route as AuthenticatedAppReviewRouteImport } from './routes/_authenticated/app.review'
+import { Route as AuthenticatedAppWaitlistRouteImport } from './routes/_authenticated/app.waitlist'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
 import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
 import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
@@ -99,6 +100,12 @@ const AuthenticatedAppReviewRoute = AuthenticatedAppReviewRouteImport.update({
   path: '/review',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppWaitlistRoute =
+  AuthenticatedAppWaitlistRouteImport.update({
+    id: '/waitlist',
+    path: '/waitlist',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const ApiPublicV1DesignRoute = ApiPublicV1DesignRouteImport.update({
   id: '/api/public/v1/design',
   path: '/api/public/v1/design',
@@ -138,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/app/logs': typeof AuthenticatedAppLogsRoute
   '/app/model': typeof AuthenticatedAppModelRoute
   '/app/review': typeof AuthenticatedAppReviewRoute
+  '/app/waitlist': typeof AuthenticatedAppWaitlistRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
   '/app/logs': typeof AuthenticatedAppLogsRoute
   '/app/model': typeof AuthenticatedAppModelRoute
   '/app/review': typeof AuthenticatedAppReviewRoute
+  '/app/waitlist': typeof AuthenticatedAppWaitlistRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -179,6 +188,7 @@ export interface FileRoutesById {
   '/_authenticated/app/logs': typeof AuthenticatedAppLogsRoute
   '/_authenticated/app/model': typeof AuthenticatedAppModelRoute
   '/_authenticated/app/review': typeof AuthenticatedAppReviewRoute
+  '/_authenticated/app/waitlist': typeof AuthenticatedAppWaitlistRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/app/logs'
     | '/app/model'
     | '/app/review'
+    | '/app/waitlist'
     | '/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/app/logs'
     | '/app/model'
     | '/app/review'
+    | '/app/waitlist'
     | '/app'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -241,6 +253,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/logs'
     | '/_authenticated/app/model'
     | '/_authenticated/app/review'
+    | '/_authenticated/app/waitlist'
     | '/_authenticated/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
@@ -362,6 +375,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppReviewRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/waitlist': {
+      id: '/_authenticated/app/waitlist'
+      path: '/waitlist'
+      fullPath: '/app/waitlist'
+      preLoaderRoute: typeof AuthenticatedAppWaitlistRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/api/public/v1/design': {
       id: '/api/public/v1/design'
       path: '/api/public/v1/design'
@@ -408,6 +428,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppLogsRoute: typeof AuthenticatedAppLogsRoute
   AuthenticatedAppModelRoute: typeof AuthenticatedAppModelRoute
   AuthenticatedAppReviewRoute: typeof AuthenticatedAppReviewRoute
+  AuthenticatedAppWaitlistRoute: typeof AuthenticatedAppWaitlistRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -419,6 +440,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppLogsRoute: AuthenticatedAppLogsRoute,
   AuthenticatedAppModelRoute: AuthenticatedAppModelRoute,
   AuthenticatedAppReviewRoute: AuthenticatedAppReviewRoute,
+  AuthenticatedAppWaitlistRoute: AuthenticatedAppWaitlistRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 

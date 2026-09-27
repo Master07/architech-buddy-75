@@ -126,6 +126,26 @@ function Landing() {
         </section>
 
 
+        <section id="how-it-works" className="border-b border-border">
+          <div className="mx-auto max-w-5xl px-6 py-20">
+            <p className="label-mono text-primary">How it works · 70 seconds</p>
+            <h2 className="mt-4">See the tool in action</h2>
+            <div className="panel mt-8 overflow-hidden bg-card p-0">
+              <video
+                className="block aspect-video w-full"
+                src="/how-it-works.mp4"
+                poster="/how-it-works-poster.jpg"
+                controls
+                playsInline
+                preload="metadata"
+              />
+            </div>
+            <p className="mt-4 text-sm text-muted-foreground">
+              New accounts join a short waitlist and get access once approved.
+            </p>
+          </div>
+        </section>
+
         <section className="border-b border-border bg-card">
           <div className="mx-auto grid max-w-6xl gap-px bg-border md:grid-cols-4">
             {DESIGN_MODES.map((mode) => (

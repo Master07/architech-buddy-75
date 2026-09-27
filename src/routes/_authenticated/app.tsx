@@ -2,9 +2,10 @@ import { createFileRoute, Link, Outlet, useNavigate, useRouter } from "@tanstack
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { listThreads, createThread } from "@/lib/threads.functions";
+import { getMyAccess } from "@/lib/waitlist.functions";
 import { Button } from "@/components/ui/button";
 import { MODE_META, type DesignMode } from "@/lib/design-agent";
-import { BookOpen, FileText, Gauge, GitBranch, KeyRound, LogOut, Plus, Cpu, History } from "lucide-react";
+import { BookOpen, FileText, Gauge, GitBranch, KeyRound, LogOut, Plus, Cpu, History, Users, Hourglass } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -29,10 +30,25 @@ function AppShell() {
   const router = useRouter();
   const [creating, setCreating] = useState(false);
 
+  const access = useQuery({ queryKey: ["my-access"], queryFn: () => getMyAccess() });
+  const approved = access.data?.status === "approved";
   const threads = useQuery({
     queryKey: ["threads"],
     queryFn: () => listThreads(),
+    enabled: approved,
   });
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    router.navigate({ to: "/auth" });
+  }
+
+  if (access.isLoading) {
+    return <div className="grid h-screen place-items-center label-mono text-muted-foreground">Loading…</div>;
+  }
+  if (!approved) {
+    return <WaitlistScreen status={access.data?.status ?? "pending"} onSignOut={signOut} />;
+  }
 
   async function startThread(mode: DesignMode) {
     setCreating(true);
@@ -74,7 +90,7 @@ function AppShell() {
         </div>
 
         <nav className="space-y-1 border-b border-sidebar-border p-3">
-          {NAV.map((item) => (
+          {[...NAV, ...(access.data?.isAdmin ? [{ to: "/app/waitlist", label: "Waitlist", icon: Users }] as const : [])].map((item) => (
             <Link
               key={item.to}
               to={item.to}
@@ -110,10 +126,7 @@ function AppShell() {
             variant="ghost"
             size="sm"
             className="w-full justify-start text-muted-foreground"
-            onClick={async () => {
-              await supabase.auth.signOut();
-              router.navigate({ to: "/auth" });
-            }}
+            onClick={signOut}
           >
             <LogOut className="size-3.5" /> Sign out
           </Button>
@@ -123,6 +136,28 @@ function AppShell() {
       <main className="min-w-0 flex-1 bg-background">
         <Outlet />
       </main>
+    </div>
+  );
+}
+
+function WaitlistScreen({ status, onSignOut }: { status: string; onSignOut: () => void }) {
+  const rejected = status === "rejected";
+  return (
+    <div className="grid-paper grid min-h-screen place-items-center px-6">
+      <div className="panel max-w-lg bg-background p-10 text-center">
+        <Hourglass className="mx-auto size-8" />
+        <p className="label-mono mt-6 text-primary">{rejected ? "Access not granted" : "You're on the waitlist"}</p>
+        <h1 className="mt-4 text-2xl">{rejected ? "Not this time" : "Thanks for signing up"}</h1>
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+          {rejected
+            ? "Your request for access wasn't approved. Contact the team if you think this is a mistake."
+            : "We're letting people in gradually. You'll be able to use System Design Architect as soon as your account is approved — just sign in again later."}
+        </p>
+        <div className="mt-8 flex justify-center gap-3">
+          <Button asChild variant="outline"><Link to="/">Back to home</Link></Button>
+          <Button onClick={onSignOut}><LogOut className="size-3.5" /> Sign out</Button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -8,3 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- Waitlist gating: `public.is_approved()` backs RESTRICTIVE RLS on user tables plus `assertApproved` in API auth; why: one source of truth that blocks both app and API.
