@@ -34,6 +34,7 @@ import { Route as AuthenticatedAppReviewRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppWaitlistRouteImport } from './routes/_authenticated/app.waitlist'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
 import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
 import { Route as ApiPublicV1DesignsIdRouteImport } from './routes/api/public/v1/designs.$id'
 import { Route as ApiPublicV1JobsDesignRouteImport } from './routes/api/public/v1/jobs.design'
@@ -164,6 +165,12 @@ const ApiPublicV1KnowledgeRoute = ApiPublicV1KnowledgeRouteImport.update({
   path: '/api/public/v1/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicV1DesignsIndexRoute = ApiPublicV1DesignsIndexRouteImport.update({
   id: '/api/public/v1/designs/',
   path: '/api/public/v1/designs/',
@@ -205,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
   '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
@@ -233,6 +241,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
   '/api/public/v1/designs': typeof ApiPublicV1DesignsIndexRoute
@@ -264,6 +273,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
   '/api/public/v1/designs/': typeof ApiPublicV1DesignsIndexRoute
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
+    | '/lovable/email/transactional/preview'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/jobs/design'
     | '/api/public/v1/designs/'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
+    | '/lovable/email/transactional/preview'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/jobs/design'
     | '/api/public/v1/designs'
@@ -353,6 +365,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
+    | '/lovable/email/transactional/preview'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/jobs/design'
     | '/api/public/v1/designs/'
@@ -373,6 +386,7 @@ export interface RootRouteChildren {
   SamplesIndexRoute: typeof SamplesIndexRoute
   ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
   ApiPublicV1KnowledgeRoute: typeof ApiPublicV1KnowledgeRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
   ApiPublicV1JobsDesignRoute: typeof ApiPublicV1JobsDesignRoute
   ApiPublicV1DesignsIndexRoute: typeof ApiPublicV1DesignsIndexRoute
@@ -555,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1KnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/v1/designs/': {
       id: '/api/public/v1/designs/'
       path: '/api/public/v1/designs'
@@ -634,6 +655,7 @@ const rootRouteChildren: RootRouteChildren = {
   SamplesIndexRoute: SamplesIndexRoute,
   ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
   ApiPublicV1KnowledgeRoute: ApiPublicV1KnowledgeRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,
   ApiPublicV1JobsDesignRoute: ApiPublicV1JobsDesignRoute,
   ApiPublicV1DesignsIndexRoute: ApiPublicV1DesignsIndexRoute,

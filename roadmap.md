@@ -10,6 +10,6 @@
 - [x] Public landing fixes: samples, docs, about, privacy, terms, new headline
 - [x] New voiceover script for the home page video
 - [x] Public waitlist sign-up page (/waitlist) + admin list
-- [ ] Email you on each sign-up — blocked: needs an email sending domain set up
+- [x] Email you on each sign-up (sends once the email domain is verified)
 - [x] Real tool-generated design as a live sample
 - [x] Live queue dashboard (queued / running / completed, step progress, bottlenecks)
