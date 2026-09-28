@@ -30,6 +30,11 @@ function AboutPage() {
           <li>Solo founders who need a second opinion on their stack and scaling path.</li>
           <li>Engineers preparing for system design interviews.</li>
         </ul>
+        <h2 className="mt-10 text-base">Who is behind it</h2>
+        <p className="mt-4 text-muted-foreground">
+          Corbet AI is run by Navneet Kumar. Questions, feedback or deletion requests:{" "}
+          <a href="mailto:navneet.jha07@gmail.com" className="underline">navneet.jha07@gmail.com</a>.
+        </p>
         <h2 className="mt-10 text-base">Pricing</h2>
         <p className="mt-4 text-muted-foreground">Free during beta. Access is by approval while we grow capacity.</p>
       </div>

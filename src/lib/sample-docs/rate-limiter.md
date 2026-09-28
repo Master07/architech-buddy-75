@@ -116,23 +116,41 @@ Depth: full — whole subsystem, hard latency invariant, a correctness bound, an
 **X1 Recommended** — confirm target precedence (Q8). **X2 Unknown** — what 5% is measured against and which error direction is worse. **X3 Unknown** — window semantics, permitted burst size, `Retry-After` meaning. **X4 Unknown** — regional topology. **X5 Unknown** — counter durability and any billing-grade requirement; the only question that changes the architecture rather than a parameter.
 
 **A39 —** T = 25 ms round; grants sized from advertised demand plus headroom. Impact: under-admission is bounded by one round of demand redistribution rather than by a permanent share deficit. Validation: staging load test with synthetic bursty and connection-pinned keys.
+
 **A40 —** R = 2% of each key's window allowance is held unallocated, granted only by the fold owner for fast-path requests. Impact: over-admission ≤ 2% while the single-owner rule holds. Validation: adversarial simulation, all nodes bursting one key simultaneously.
+
 **A41 —** the reconciliation channel is an existing low-latency at-least-once bus, scopable to key-shard topics; measured RTT ≤ 1 ms. Impact: if absent, this design's operational burden equals Option B's. Validation: A32.
+
 **A42 —** `Retry-After` is an integer, and for waits under 1 s it is `0` with a millisecond companion header. Impact: without this a sub-second window cannot be expressed and clients idle up to 40× too long. Validation: HTTP conformance check on the 429 path.
+
 **A43 —** 429 fraction ≈ 1%. Impact: 429 log volume is 8.64 GB/day and ~0.26 TB at 30 days, so the cost lever is retention days rather than bytes; at a 10× higher 429 rate it would be ~2.6 TB and retention becomes a sizing decision. Validation: access-log sampling in P0.
+
 **A44 —** every request of a key costs 1 unit. Impact: a cost-weight dimension changes the accounting key and the grant arithmetic.
+
 **A45 —** per-key window phase offset = `hash(key_id) mod W`, deterministic and identical on all nodes, derived from wall clock, never from a monotonic clock. Impact: removes the boundary retry herd.
+
 **A46 —** deploys are staggered so no more than 3 of 20 nodes restart within one window. Impact: restart orphaning is bounded per node. Validation: deploy tooling.
+
 **A47 —** demand advertisement includes a headroom factor h = 1.25. Impact: affects grant efficiency only, never over-admission, because grants are capped by the allowance invariant. Validation: P2 fast-path utilisation test.
+
 **A48 —** fast-path grant requests stay under 0.5% of requests, alert at 1%. Impact: above 1% the p99 budget is exposed. Validation: continuous monitoring from P2.
+
 **A49 —** aggregate fleet admission ceiling = min(1.5 × peak, backend tested capacity); 1.5 × 50,000 = 75,000 req/s provisional. Impact: bounds fail-open exposure. Validation: backend saturation curve, see A52.
+
 **A50 —** pinned retention: buckets and reports memory-only, life = one window plus two rounds; limit events 30 days; config audit 13 months.
+
 **A51 —** bus RTT ≤ 1 ms; fast-path deadline 1 ms hard.
+
 **A52 —** backend saturation knee — **Unknown**; the ceiling cannot be set correctly without it. Impact: the exposure bound is provisional. Validation: a backend load-to-failure test before P3.
+
 **A53 —** hashed key ids are version-prefixed; the old hash key version is retained for the full retention period of the events it covers, then destroyed.
+
 **A54 —** the backstop floor and fleet ceiling are implemented in a layer surviving limiter middleware failure — either a gateway-level pre-module with its own process or an edge L7 rule — not inside the limiter.
+
 **A55 —** connections are pinned to nodes for minutes at a time, so per-key traffic is unevenly distributed. Impact: this is why credit is demand-driven rather than pre-allocated. Validation: P0 concentration measurement, with a decision gate.
+
 **A56 —** the grant and report envelopes are the only source of admission credit, so a forged grant is indistinguishable from a legitimate one unless the path is authenticated. Impact: the grant path is a control plane and requires mTLS and strict schema rejection. Validation: security review before P2.
+
 **A57 —** tenant isolation is per-key and per-backstop, but fold shards are shared hardware, so hard isolation of accuracy and latency depends on top-K isolation working. Impact: a hot key on a shared shard can delay folding for co-tenant keys if top-K isolation fails. Validation: P2 hot-key test asserting p99 fold age for non-top-K keys stays under 2 rounds.
 
 ## Capacity Calculations *

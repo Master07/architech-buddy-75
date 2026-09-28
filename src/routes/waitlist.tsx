@@ -46,7 +46,7 @@ function WaitlistPage() {
         <p className="label-mono text-primary">Free during beta</p>
         <h1 className="mt-4">Join the waitlist</h1>
         <p className="mt-4 text-muted-foreground">
-          Leave your email and we'll let you know when your spot is ready.
+          Leave your email and we'll let you know when your spot is ready. We review new requests every few days, and you'll get an email the moment yours is approved.
         </p>
         {done ? (
           <div className="panel mt-10 p-6">

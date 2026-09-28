@@ -28,7 +28,7 @@ async function renderMermaid(source: string): Promise<string> {
       lineColor: "#1e3a8a",
       secondaryColor: "#fde68a",
       tertiaryColor: "#ffffff",
-      fontSize: "13px",
+      fontSize: "17px",
     },
   });
   idCounter += 1;
