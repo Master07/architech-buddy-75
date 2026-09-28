@@ -1,3 +1,4 @@
+import { template as waitlistSignup } from './waitlist-signup'
 import type { ComponentType } from 'react'
 
 export interface TemplateEntry {
@@ -18,6 +19,7 @@ export interface TemplateEntry {
  *   // then add to TEMPLATES: 'welcome': welcomeTemplate
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'waitlist-signup': waitlistSignup,
   // Add templates here as they are created, e.g.:
   // 'welcome': welcomeTemplate,
 }
