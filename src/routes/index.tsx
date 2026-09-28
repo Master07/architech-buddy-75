@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { MODE_META, DESIGN_MODES } from "@/lib/design-agent";
 import { ArrowRight, BookOpen, GitBranch, Plug, ShieldCheck, Zap } from "lucide-react";
+import homepageVideo from "@/assets/homepage-video-cinematic-v2.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -135,7 +136,7 @@ function Landing() {
             <div className="panel mt-8 overflow-hidden bg-card p-0">
               <video
                 className="block aspect-video w-full"
-                src="/how-it-works.mp4"
+                src={homepageVideo.url}
                 poster="/how-it-works-poster.jpg"
                 controls
                 playsInline
