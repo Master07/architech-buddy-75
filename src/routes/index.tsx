@@ -4,6 +4,7 @@ import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { MODE_META, DESIGN_MODES } from "@/lib/design-agent";
 import { ArrowRight, BookOpen, GitBranch, Plug, ShieldCheck, Zap } from "lucide-react";
 import homepageVideo from "@/assets/homepage-video-cinematic-v2.mp4.asset.json";
+import productTourVideo from "@/assets/homepage-video-animated.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -66,7 +67,27 @@ const AUDIENCE = [
   { title: "Interview prep", body: "Practise with scoped questions and full worked answers." },
 ];
 
+const VIDEOS = {
+  cinematic: {
+    label: "Cinematic tour",
+    blurb: "Filmed walkthrough of the design workflow, scene by scene.",
+    src: homepageVideo.url,
+    poster: "/how-it-works-poster.jpg",
+  },
+  product: {
+    label: "Real product tour",
+    blurb: "Actual screens from the tool — interview, design doc, review, logs and API keys.",
+    src: productTourVideo.url,
+    poster: "/how-it-works-poster.jpg",
+  },
+} as const;
+
+type VideoKey = keyof typeof VIDEOS;
+
 function Landing() {
+  const [activeVideo, setActiveVideo] = useState<VideoKey>("cinematic");
+  const video = VIDEOS[activeVideo];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
