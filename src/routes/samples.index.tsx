@@ -20,6 +20,7 @@ function SamplesPage() {
         <h1 className="mt-4">Example design documents</h1>
         <p className="mt-4 text-muted-foreground">
           The rate limiter is a complete, unedited document produced by the tool. The URL shortener is a shortened example.
+          Start with the executive summary, alternatives considered, and failure modes — the rest is reference detail.
         </p>
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {SAMPLES.map((s) => (
