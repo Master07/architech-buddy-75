@@ -5,7 +5,8 @@ import { listThreads, createThread } from "@/lib/threads.functions";
 import { getMyAccess } from "@/lib/waitlist.functions";
 import { Button } from "@/components/ui/button";
 import { MODE_META, type DesignMode } from "@/lib/design-agent";
-import { BookOpen, FileText, Gauge, GitBranch, KeyRound, LogOut, Plus, Cpu, History, Users, Hourglass } from "lucide-react";
+import { BookOpen, FileText, Gauge, KeyRound, LogOut, Plus, Cpu, History, Users, Hourglass } from "lucide-react";
+import iconMark from "@/assets/icon-mark.png.asset.json";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -67,9 +68,7 @@ function AppShell() {
     <div className="flex h-screen bg-background">
       <aside className="flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
         <div className="flex items-center gap-2.5 border-b border-sidebar-border px-4 py-4">
-          <div className="grid size-6 place-items-center rounded bg-primary">
-            <GitBranch className="size-3.5 text-primary-foreground" />
-          </div>
+          <img src={iconMark.url} alt="" className="size-6 shrink-0" />
           <span className="font-display text-sm font-bold tracking-tight">ARCHITECT_OS</span>
         </div>
 
