@@ -14,3 +14,4 @@
 - [x] Real tool-generated design as a live sample
 - [x] Live queue dashboard (queued / running / completed, step progress, bottlenecks)
 - [x] Replace cinematic video overlays with verified product workflow text and install it on the homepage
+- [x] Place both videos on the homepage with a tab switcher (Cinematic tour / Real product tour)

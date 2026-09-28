@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { SiteHeader, SiteFooter } from "@/components/site-chrome";
 import { MODE_META, DESIGN_MODES } from "@/lib/design-agent";
 import { ArrowRight, BookOpen, GitBranch, Plug, ShieldCheck, Zap } from "lucide-react";
 import homepageVideo from "@/assets/homepage-video-cinematic-v2.mp4.asset.json";
+import productTourVideo from "@/assets/homepage-video-animated.mp4.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -66,7 +68,27 @@ const AUDIENCE = [
   { title: "Interview prep", body: "Practise with scoped questions and full worked answers." },
 ];
 
+const VIDEOS = {
+  cinematic: {
+    label: "Cinematic tour",
+    blurb: "Filmed walkthrough of the design workflow, scene by scene.",
+    src: homepageVideo.url,
+    poster: "/how-it-works-poster.jpg",
+  },
+  product: {
+    label: "Real product tour",
+    blurb: "Actual screens from the tool — interview, design doc, review, logs and API keys.",
+    src: productTourVideo.url,
+    poster: "/how-it-works-poster-product.jpg",
+  },
+} as const;
+
+type VideoKey = keyof typeof VIDEOS;
+
 function Landing() {
+  const [activeVideo, setActiveVideo] = useState<VideoKey>("cinematic");
+  const video = VIDEOS[activeVideo];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
@@ -131,13 +153,34 @@ function Landing() {
 
         <section id="how-it-works" className="border-b border-border">
           <div className="mx-auto max-w-5xl px-6 py-20">
-            <p className="label-mono text-primary">How it works · 70 seconds</p>
+            <p className="label-mono text-primary">How it works · 92 seconds each</p>
             <h2 className="mt-4">See the tool in action</h2>
-            <div className="panel mt-8 overflow-hidden bg-card p-0">
+            <div className="mt-8 flex flex-wrap gap-2">
+              {(Object.keys(VIDEOS) as VideoKey[]).map((key) => {
+                const isActive = key === activeVideo;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setActiveVideo(key)}
+                    className={`label-mono border-2 px-4 py-2 transition-colors ${
+                      isActive
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card text-foreground hover:border-primary"
+                    }`}
+                  >
+                    {VIDEOS[key].label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">{video.blurb}</p>
+            <div className="panel mt-6 overflow-hidden bg-card p-0">
               <video
+                key={activeVideo}
                 className="block aspect-video w-full"
-                src={homepageVideo.url}
-                poster="/how-it-works-poster.jpg"
+                src={video.src}
+                poster={video.poster}
                 controls
                 playsInline
                 preload="metadata"
