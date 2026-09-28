@@ -5,7 +5,8 @@ import { listThreads, createThread } from "@/lib/threads.functions";
 import { getMyAccess } from "@/lib/waitlist.functions";
 import { Button } from "@/components/ui/button";
 import { MODE_META, type DesignMode } from "@/lib/design-agent";
-import { BookOpen, FileText, Gauge, GitBranch, KeyRound, LogOut, Plus, Cpu, History, Users, Hourglass } from "lucide-react";
+import { BookOpen, FileText, Gauge, KeyRound, LogOut, Plus, Cpu, History, Users, Hourglass } from "lucide-react";
+import iconMark from "@/assets/icon-mark.png.asset.json";
 import { toast } from "sonner";
 import { useState } from "react";
 
