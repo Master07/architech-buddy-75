@@ -79,9 +79,7 @@ const VIDEOS = {
     label: "Real product tour",
     blurb: "Actual screens from the tool — interview, design doc, review, logs and API keys.",
     src: productTourVideo.url,
-    poster: "/how-it-works-poster.jpg",
-  },
-} as const;
+    poster: "/how-it-works-poster-product.jpg",
 
 type VideoKey = keyof typeof VIDEOS;
 
