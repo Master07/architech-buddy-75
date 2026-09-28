@@ -67,9 +67,7 @@ function AppShell() {
     <div className="flex h-screen bg-background">
       <aside className="flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
         <div className="flex items-center gap-2.5 border-b border-sidebar-border px-4 py-4">
-          <div className="grid size-6 place-items-center rounded bg-primary">
-            <GitBranch className="size-3.5 text-primary-foreground" />
-          </div>
+          <img src={iconMark.url} alt="" className="size-6 shrink-0" />
           <span className="font-display text-sm font-bold tracking-tight">ARCHITECT_OS</span>
         </div>
 
