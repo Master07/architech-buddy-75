@@ -34,6 +34,8 @@ import { Route as AuthenticatedAppReviewRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppWaitlistRouteImport } from './routes/_authenticated/app.waitlist'
 import { Route as ApiPublicV1DesignRouteImport } from './routes/api/public/v1/design'
 import { Route as ApiPublicV1KnowledgeRouteImport } from './routes/api/public/v1/knowledge'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as ApiPublicV1DesignsIndexRouteImport } from './routes/api/public/v1/designs.index'
 import { Route as ApiPublicV1DesignsIdRouteImport } from './routes/api/public/v1/designs.$id'
@@ -165,6 +167,16 @@ const ApiPublicV1KnowledgeRoute = ApiPublicV1KnowledgeRouteImport.update({
   path: '/api/public/v1/knowledge',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailTransactionalPreviewRoute =
   LovableEmailTransactionalPreviewRouteImport.update({
     id: '/lovable/email/transactional/preview',
@@ -212,6 +224,8 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
@@ -241,6 +255,8 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
@@ -273,6 +289,8 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/api/public/v1/design': typeof ApiPublicV1DesignRoute
   '/api/public/v1/knowledge': typeof ApiPublicV1KnowledgeRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/api/public/v1/designs/$id': typeof ApiPublicV1DesignsIdRoute
   '/api/public/v1/jobs/design': typeof ApiPublicV1JobsDesignRoute
@@ -305,6 +323,8 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/jobs/design'
@@ -334,6 +354,8 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/jobs/design'
@@ -365,6 +387,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/api/public/v1/design'
     | '/api/public/v1/knowledge'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/transactional/preview'
     | '/api/public/v1/designs/$id'
     | '/api/public/v1/jobs/design'
@@ -386,6 +410,8 @@ export interface RootRouteChildren {
   SamplesIndexRoute: typeof SamplesIndexRoute
   ApiPublicV1DesignRoute: typeof ApiPublicV1DesignRoute
   ApiPublicV1KnowledgeRoute: typeof ApiPublicV1KnowledgeRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
   ApiPublicV1DesignsIdRoute: typeof ApiPublicV1DesignsIdRoute
   ApiPublicV1JobsDesignRoute: typeof ApiPublicV1JobsDesignRoute
@@ -569,6 +595,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicV1KnowledgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/transactional/preview': {
       id: '/lovable/email/transactional/preview'
       path: '/lovable/email/transactional/preview'
@@ -655,6 +695,8 @@ const rootRouteChildren: RootRouteChildren = {
   SamplesIndexRoute: SamplesIndexRoute,
   ApiPublicV1DesignRoute: ApiPublicV1DesignRoute,
   ApiPublicV1KnowledgeRoute: ApiPublicV1KnowledgeRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
   ApiPublicV1DesignsIdRoute: ApiPublicV1DesignsIdRoute,
   ApiPublicV1JobsDesignRoute: ApiPublicV1JobsDesignRoute,
