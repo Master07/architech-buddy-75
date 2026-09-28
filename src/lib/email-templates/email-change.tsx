@@ -66,7 +66,7 @@ export const EmailChangeEmail = ({
 
 export default EmailChangeEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const main = { backgroundColor: '#ffffff', fontFamily: "'JetBrains Mono', 'Courier New', monospace" }
 const container = { padding: '20px 25px' }
 const h1 = {
   fontSize: '22px',
@@ -86,7 +86,7 @@ const button = {
   color: '#ffffff',
   fontSize: '14px',
   border: '1px solid #000000',
-  borderRadius: '8px',
+  borderRadius: '0px',
   padding: '12px 20px',
   textDecoration: 'none',
 }
