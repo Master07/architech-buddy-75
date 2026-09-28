@@ -13,3 +13,4 @@
 - [x] Email you on each sign-up (sends once the email domain is verified)
 - [x] Real tool-generated design as a live sample
 - [x] Live queue dashboard (queued / running / completed, step progress, bottlenecks)
+- [x] Replace cinematic video overlays with verified product workflow text and install it on the homepage
