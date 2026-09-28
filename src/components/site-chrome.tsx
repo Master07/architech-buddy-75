@@ -1,16 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import iconMark from "@/assets/icon-mark.png.asset.json";
+import primaryLockup from "@/assets/primary-lockup.png.asset.json";
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="grid size-7 place-items-center border border-border">
-            <GitBranch className="size-4 text-foreground" />
-          </div>
-          <span className="font-display text-sm tracking-tight">SDA</span>
+        <Link to="/" className="flex items-center" aria-label="System Design Architect by Corbet AI">
+          <img src={primaryLockup.url} alt="System Design Architect by Corbet AI" className="hidden h-9 w-auto sm:block" />
+          <img src={iconMark.url} alt="System Design Architect" className="h-7 w-auto sm:hidden" />
         </Link>
         <nav className="flex items-center gap-1 sm:gap-3">
           <Button asChild size="sm" variant="ghost">
