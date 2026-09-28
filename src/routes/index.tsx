@@ -80,6 +80,8 @@ const VIDEOS = {
     blurb: "Actual screens from the tool — interview, design doc, review, logs and API keys.",
     src: productTourVideo.url,
     poster: "/how-it-works-poster-product.jpg",
+  },
+} as const;
 
 type VideoKey = keyof typeof VIDEOS;
 
