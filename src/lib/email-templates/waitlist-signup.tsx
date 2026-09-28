@@ -32,7 +32,7 @@ function WaitlistSignupEmail({ email = 'someone@example.com', name, useCase, not
 
 export const template = {
   component: WaitlistSignupEmail,
-  subject: (d: Record<string, any>) => `New waitlist sign-up: ${d.email ?? ''}`,
+  subject: (d: Record<string, any>) => `New waitlist sign-up: ${d['email'] ?? ''}`,
   displayName: 'Waitlist sign-up (to admin)',
   to: 'navneet.jha07@gmail.com',
   previewData: { email: 'jane@example.com', name: 'Jane', useCase: 'Design docs at work', note: 'Excited!' },
