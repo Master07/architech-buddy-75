@@ -22,6 +22,7 @@ export const joinWaitlist = createServerFn({ method: "POST" })
     });
     if (error && error.code !== "23505") throw new Error("Could not join the waitlist. Please try again.");
     if (!error) {
+      // Notify the owner.
       try {
         const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
         await sendTemplateEmail("waitlist-signup", "navneet.jha07@gmail.com", {
@@ -30,6 +31,16 @@ export const joinWaitlist = createServerFn({ method: "POST" })
         });
       } catch (e) {
         console.error("waitlist signup email failed", (e as Error).message);
+      }
+      // Confirm to the person who signed up.
+      try {
+        const { sendTemplateEmail } = await import("@/lib/email-templates/send-email");
+        await sendTemplateEmail("waitlist-confirmation", data.email.toLowerCase(), {
+          templateData: { email: data.email.toLowerCase(), name: data.name, useCase: data.useCase },
+          idempotencyKey: `waitlist-confirmation-${data.email.toLowerCase()}`,
+        });
+      } catch (e) {
+        console.error("waitlist confirmation email failed", (e as Error).message);
       }
     }
     return { ok: true };
