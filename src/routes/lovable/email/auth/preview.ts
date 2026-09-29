@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "Design Buddy"
+const SITE_NAME = "System Design Architect"
 const ROOT_DOMAIN = "sda.corbetai.com"
 
 // Sample data for preview mode ONLY (not used in actual email sending).

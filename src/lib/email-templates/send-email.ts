@@ -5,7 +5,7 @@ import { TEMPLATES } from './registry'
 // Server-only: reads LOVABLE_API_KEY and RESEND_API_KEY. Never import from client components.
 
 // Configuration baked in at scaffold time
-const SITE_NAME = "Design Buddy"
+const SITE_NAME = "System Design Architect"
 // Sending domain verified in Resend (Resend dashboard -> Domains).
 const FROM_DOMAIN = "send.sda.corbetai.com"
 

@@ -9,7 +9,7 @@ import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
-const SITE_NAME = "Design Buddy"
+const SITE_NAME = "System Design Architect"
 const SENDER_DOMAIN = "notify.sda.corbetai.com"
 const ROOT_DOMAIN = "sda.corbetai.com"
 const FROM_DOMAIN = "notify.sda.corbetai.com"
